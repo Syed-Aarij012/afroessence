@@ -1,0 +1,1037 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+
+// Type-safe supabase client wrapper
+const db = supabase as any;
+import { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Search, 
+  Mail, 
+  Phone, 
+  Calendar, 
+  Clock, 
+  User as UserIcon, 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Activity,
+  Filter,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  Star,
+  MapPin,
+  Briefcase
+} from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
+import { Card3D, InteractiveCard } from "@/components/3D/Card3D";
+import { AnimatedBackground, ParallaxSection } from "@/components/3D/AnimatedBackground";
+
+interface Booking {
+  id: string;
+  booking_date: string;
+  booking_time: string;
+  status: string;
+  notes: string;
+  user_id: string;
+  created_at: string;
+  services: { name: string; price: number };
+  professionals: { name: string };
+  profiles: { full_name: string; phone: string; email?: string };
+}
+
+interface UserProfile {
+  id: string;
+  full_name: string;
+  phone: string;
+  email: string;
+  created_at: string;
+  total_bookings: number;
+  total_spent: number;
+  last_booking: string;
+}
+
+interface ServiceItem {
+  id: string;
+  name: string;
+  price: number;
+  duration_minutes?: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+interface DashboardStats {
+  totalUsers: number;
+  totalBookings: number;
+  totalRevenue: number;
+  pendingBookings: number;
+  todayBookings: number;
+  monthlyRevenue: number;
+}
+
+const ModernAdmin = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+    pendingBookings: 0,
+    todayBookings: 0,
+    monthlyRevenue: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  const [editingServicePrice, setEditingServicePrice] = useState<string>("");
+  const [editingServiceName, setEditingServiceName] = useState<string>("");
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, []);
+
+  const checkAdminStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+
+    setUser(session.user);
+
+    // Check if user is admin
+    const { data: roleData } = await db
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!roleData) {
+      toast.error("You don't have admin access");
+      navigate("/");
+      return;
+    }
+
+    setIsAdmin(true);
+    loadDashboardData();
+  };
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    await Promise.all([
+      loadBookings(),
+      loadUsers(),
+      loadServices(),
+      loadStats()
+    ]);
+    setLoading(false);
+  };
+
+  const loadStats = async () => {
+    try {
+      // Get total users
+      const { count: userCount } = await db
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+
+      // Get total bookings
+      const { count: bookingCount } = await db
+        .from("bookings")
+        .select("*", { count: "exact", head: true });
+
+      // Get pending bookings
+      const { count: pendingCount } = await db
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending");
+
+      // Get today's bookings
+      const today = new Date().toISOString().split('T')[0];
+      const { count: todayCount } = await db
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("booking_date", today);
+
+      // Get revenue data
+      const { data: revenueData } = await db
+        .from("bookings")
+        .select("services(price), created_at")
+        .neq("status", "cancelled");
+
+      const totalRevenue = revenueData?.reduce((sum, booking) => {
+        return sum + (booking.services?.price || 0);
+      }, 0) || 0;
+
+      // Calculate monthly revenue (current month)
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const monthlyRevenue = revenueData?.reduce((sum, booking) => {
+        const bookingDate = new Date(booking.created_at);
+        if (bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear) {
+          return sum + (booking.services?.price || 0);
+        }
+        return sum;
+      }, 0) || 0;
+
+      setStats({
+        totalUsers: userCount || 0,
+        totalBookings: bookingCount || 0,
+        totalRevenue,
+        pendingBookings: pendingCount || 0,
+        todayBookings: todayCount || 0,
+        monthlyRevenue,
+      });
+    } catch (error) {
+      console.error("Error loading stats:", error);
+    }
+  };
+
+  const loadBookings = async () => {
+    try {
+      // Load bookings without joins to avoid 400 error
+      const { data: bookingsData, error: bookingsError } = await db
+        .from("bookings")
+        .select("*")
+        .order("booking_date", { ascending: false });
+
+      if (bookingsError) {
+        toast.error("Failed to load bookings");
+        console.error("Bookings error:", bookingsError);
+        return;
+      }
+
+      // Load services and professionals separately
+      const { data: servicesData } = await db
+        .from("services")
+        .select("id, name, price");
+
+      const { data: professionalsData } = await db
+        .from("professionals")
+        .select("id, name");
+
+      const { data: profilesData } = await db
+        .from("profiles")
+        .select("id, full_name, phone, email");
+
+      console.log("Admin - Loaded data:", {
+        bookings: bookingsData?.length,
+        services: servicesData?.length,
+        professionals: professionalsData?.length,
+        profiles: profilesData?.length
+      });
+
+      // Combine data manually
+      const enrichedBookings = (bookingsData || []).map((booking: any) => {
+        const service = servicesData?.find((s: any) => s.id === booking.service_id);
+        const professional = professionalsData?.find((p: any) => p.id === booking.professional_id);
+        const profile = profilesData?.find((pr: any) => pr.id === booking.user_id);
+        
+        return {
+          ...booking,
+          services: { 
+            name: service?.name || "Unknown Service",
+            price: service?.price || 0
+          },
+          professionals: { 
+            name: professional?.name || "Unknown Professional" 
+          },
+          profiles: {
+            full_name: profile?.full_name || "Unknown Customer",
+            phone: profile?.phone || "",
+            email: profile?.email || ""
+          }
+        };
+      });
+
+      console.log("Admin - Enriched bookings:", enrichedBookings);
+      setBookings(enrichedBookings);
+    } catch (error) {
+      toast.error("Failed to load bookings");
+      console.error("Exception loading bookings:", error);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const { data: profiles, error: profilesError } = await db
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (profilesError) throw profilesError;
+
+      // Load all bookings and services separately
+      const { data: allBookings } = await db
+        .from("bookings")
+        .select("id, user_id, booking_date, service_id, status");
+
+      const { data: servicesData } = await db
+        .from("services")
+        .select("id, price");
+
+      console.log("Admin - User stats data:", {
+        profiles: profiles?.length,
+        bookings: allBookings?.length,
+        services: servicesData?.length
+      });
+
+      const usersWithStats = (profiles || []).map((profile: any) => {
+        // Get bookings for this user
+        const userBookings = allBookings?.filter((b: any) => 
+          b.user_id === profile.id && b.status !== "cancelled"
+        ) || [];
+
+        const totalBookings = userBookings.length;
+        
+        // Calculate total spent
+        const totalSpent = userBookings.reduce((sum: number, booking: any) => {
+          const service = servicesData?.find((s: any) => s.id === booking.service_id);
+          return sum + (service?.price || 0);
+        }, 0);
+
+        // Find last booking date
+        const lastBooking = userBookings.length > 0 
+          ? Math.max(...userBookings.map((b: any) => new Date(b.booking_date).getTime()))
+          : null;
+
+        return {
+          id: profile.id,
+          full_name: profile.full_name || "Unknown",
+          phone: profile.phone || "Not provided",
+          email: profile.email || "Not provided",
+          created_at: profile.created_at,
+          total_bookings: totalBookings,
+          total_spent: totalSpent,
+          last_booking: lastBooking ? new Date(lastBooking).toISOString() : "Never"
+        };
+      });
+
+      console.log("Admin - Users with stats:", usersWithStats);
+      setUsers(usersWithStats);
+    } catch (error) {
+      console.error("Failed to load users:", error);
+      toast.error("Failed to load user data");
+    }
+  };
+
+  const loadServices = async () => {
+    try {
+      const { data, error } = await db
+        .from("services")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setServices(data || []);
+    } catch (error) {
+      console.error("Failed to load services:", error);
+      toast.error("Failed to load services");
+    }
+  };
+
+  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    const { error } = await db
+      .from("bookings")
+      .update({ status: newStatus })
+      .eq("id", bookingId);
+
+    if (error) {
+      toast.error("Failed to update booking status");
+      console.error(error);
+    } else {
+      toast.success(`Booking ${newStatus} successfully`);
+      loadBookings();
+      loadStats(); // Refresh stats
+    }
+  };
+
+  const startEditService = (service: ServiceItem) => {
+    setEditingServiceId(service.id);
+    setEditingServicePrice(String(service.price));
+    setEditingServiceName(service.name);
+  };
+
+  const cancelEditService = () => {
+    setEditingServiceId(null);
+    setEditingServicePrice("");
+    setEditingServiceName("");
+  };
+
+  const saveServiceChanges = async () => {
+    if (!editingServiceId) return;
+    
+    const parsedPrice = Number(editingServicePrice);
+    if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
+      toast.error("Enter a valid non-negative price");
+      return;
+    }
+
+    if (!editingServiceName.trim()) {
+      toast.error("Service name cannot be empty");
+      return;
+    }
+
+    try {
+      const { error } = await db
+        .from("services")
+        .update({ 
+          price: parsedPrice,
+          name: editingServiceName.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", editingServiceId);
+
+      if (error) {
+        toast.error("Failed to update service");
+        console.error("Service update error:", error);
+        return;
+      }
+
+      toast.success("Service updated successfully");
+      setEditingServiceId(null);
+      setEditingServicePrice("");
+      setEditingServiceName("");
+      loadServices(); // Refresh services list
+    } catch (error) {
+      toast.error("Failed to update service");
+      console.error("Exception updating service:", error);
+    }
+  };
+
+  const toggleServiceStatus = async (serviceId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await db
+        .from("services")
+        .update({ 
+          is_active: !currentStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", serviceId);
+
+      if (error) {
+        toast.error("Failed to update service status");
+        console.error("Service status update error:", error);
+        return;
+      }
+
+      toast.success(`Service ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+      loadServices(); // Refresh services list
+    } catch (error) {
+      toast.error("Failed to update service status");
+      console.error("Exception updating service status:", error);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return "bg-accent/10 text-accent border-accent/20";
+      case "completed":
+        return "bg-accent/20 text-accent border-accent/30";
+      case "cancelled":
+        return "bg-muted text-muted-foreground border-border";
+      default:
+        return "bg-accent/5 text-accent border-accent/10";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return <CheckCircle className="h-4 w-4" />;
+      case "completed":
+        return <Star className="h-4 w-4" />;
+      case "cancelled":
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <AlertCircle className="h-4 w-4" />;
+    }
+  };
+
+  const filterBookings = () => {
+    let filtered = bookings;
+    
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(b => b.status === statusFilter);
+    }
+    
+    if (selectedUser && selectedUser !== "all") {
+      filtered = filtered.filter(b => b.user_id === selectedUser);
+    }
+    
+    if (searchTerm) {
+      filtered = filtered.filter(b => 
+        b.profiles.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        b.profiles.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        b.services.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.phone.includes(searchTerm)
+  );
+
+  if (loading || !isAdmin) {
+    return (
+      <AnimatedBackground>
+        <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+          <ParticleBackground />
+          <FloatingElement>
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full flex items-center justify-center animate-pulse">
+                <div className="w-8 h-8 bg-accent rounded-full"></div>
+              </div>
+              <p className="text-muted-foreground text-lg">Loading admin panel...</p>
+            </div>
+          </FloatingElement>
+        </div>
+      </AnimatedBackground>
+    );
+  }
+
+  return (
+    <AnimatedBackground>
+      <div className="min-h-screen bg-background pt-20 pb-16 relative">
+        <ParticleBackground />
+        
+        {/* Background decorations */}
+        <GradientOrb size={400} className="top-10 right-10 opacity-15" />
+        <GradientOrb size={300} color="primary" className="bottom-20 left-20 opacity-15" />
+        <GradientOrb size={200} className="top-1/2 left-1/2 opacity-10" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <FloatingElement delay={0}>
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">
+                      Admin Dashboard
+                    </h1>
+                    <p className="text-muted-foreground text-lg">Manage your salon operations efficiently</p>
+                  </div>
+                  <FloatingElement delay={0.2}>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right backdrop-blur-sm bg-card/50 rounded-lg p-3 border border-border/50">
+                        <p className="text-sm text-muted-foreground">Welcome back,</p>
+                        <p className="font-semibold text-foreground">Admin</p>
+                      </div>
+                      <div className="w-12 h-12 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
+                        <UserIcon className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                  </FloatingElement>
+                </div>
+              </div>
+            </FloatingElement>
+
+            {/* Stats Cards */}
+            <ParallaxSection speed={-0.1}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {[
+                  {
+                    title: "Total Customers",
+                    value: stats.totalUsers,
+                    icon: <Users className="h-8 w-8" />,
+                    color: "from-blue-500 to-purple-600",
+                    delay: 0.3
+                  },
+                  {
+                    title: "Total Revenue",
+                    value: `£${stats.totalRevenue.toFixed(0)}`,
+                    icon: <DollarSign className="h-8 w-8" />,
+                    color: "from-green-500 to-teal-600",
+                    delay: 0.4
+                  },
+                  {
+                    title: "Pending Bookings",
+                    value: stats.pendingBookings,
+                    icon: <AlertCircle className="h-8 w-8" />,
+                    color: "from-orange-500 to-red-600",
+                    delay: 0.5
+                  },
+                  {
+                    title: "Today's Bookings",
+                    value: stats.todayBookings,
+                    icon: <Calendar className="h-8 w-8" />,
+                    color: "from-purple-500 to-pink-600",
+                    delay: 0.6
+                  }
+                ].map((stat, index) => (
+                  <FloatingElement key={stat.title} delay={stat.delay}>
+                    <Card3D className="backdrop-blur-sm bg-card/90 border-border/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-muted-foreground text-sm font-medium">{stat.title}</p>
+                            <p className="text-3xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+                              {stat.value}
+                            </p>
+                          </div>
+                          <div className={`p-3 rounded-full bg-gradient-to-br ${stat.color} text-white shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
+                            {stat.icon}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card3D>
+                  </FloatingElement>
+                ))}
+              </div>
+            </ParallaxSection>
+
+            {/* Search and Filters */}
+            <FloatingElement delay={0.7}>
+              <Card3D className="mb-6 backdrop-blur-sm bg-card/90 border-border/50">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                      <Input
+                        placeholder="Search customers, bookings, or services..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-background/50 backdrop-blur-sm border-border/50 focus:border-accent transition-all duration-300"
+                      />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-full md:w-48 bg-background/50 backdrop-blur-sm border-border/50 focus:border-accent transition-all duration-300">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card3D>
+            </FloatingElement>
+
+            {/* Main Content Tabs */}
+            <FloatingElement delay={0.8}>
+              <Tabs defaultValue="bookings" className="w-full">
+                <div className="flex justify-center mb-8">
+                  <TabsList className="grid grid-cols-3 bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-lg">
+                    <TabsTrigger 
+                      value="bookings"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Bookings ({bookings.length})
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="customers"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Customers ({users.length})
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="services"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Services ({services.length})
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                {/* Bookings Tab */}
+                <TabsContent value="bookings">
+                  <div className="space-y-6">
+                    {filterBookings().map((booking, index) => (
+                      <FloatingElement key={booking.id} delay={index * 0.1}>
+                        <Card3D className="backdrop-blur-sm bg-card/90 border-border/50">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                                  <UserIcon className="h-6 w-6 text-accent" />
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold text-lg text-foreground group-hover:text-accent transition-colors duration-300">
+                                    {booking.profiles.full_name}
+                                  </h3>
+                                  <p className="text-muted-foreground font-medium">{booking.services.name}</p>
+                                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                                    <span className="flex items-center gap-1">
+                                      <Mail className="h-4 w-4" />
+                                      {booking.profiles.email}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Phone className="h-4 w-4" />
+                                      {booking.profiles.phone}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <Badge className={`${getStatusColor(booking.status)} flex items-center gap-1 transform group-hover:scale-105 transition-transform duration-300`}>
+                                {getStatusIcon(booking.status)}
+                                {booking.status}
+                              </Badge>
+                            </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            Date
+                          </p>
+                          <p className="font-medium text-foreground">{new Date(booking.booking_date).toLocaleDateString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            Time
+                          </p>
+                          <p className="font-medium text-foreground">{booking.booking_time.substring(0, 5)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <Briefcase className="h-4 w-4" />
+                            Professional
+                          </p>
+                          <p className="font-medium text-foreground">{booking.professionals.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Price</p>
+                          <p className="font-medium text-accent">£{booking.services.price.toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Booked</p>
+                          <p className="font-medium text-xs text-foreground">{new Date(booking.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+
+                      {booking.notes && (
+                        <div className="mb-4 p-3 bg-muted rounded-lg">
+                          <p className="text-sm text-muted-foreground">Notes</p>
+                          <p className="text-foreground">{booking.notes}</p>
+                        </div>
+                      )}
+
+                            <div className="flex gap-2">
+                              {booking.status === "pending" && (
+                                <Button
+                                  onClick={() => updateBookingStatus(booking.id, "confirmed")}
+                                  className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 transform hover:scale-105 transition-all duration-300 shadow-lg"
+                                  size="sm"
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Confirm
+                                </Button>
+                              )}
+                              {(booking.status === "pending" || booking.status === "confirmed") && (
+                                <Button
+                                  onClick={() => updateBookingStatus(booking.id, "completed")}
+                                  variant="outline"
+                                  size="sm"
+                                  className="transform hover:scale-105 transition-all duration-300 hover:bg-muted/50"
+                                >
+                                  <Star className="h-4 w-4 mr-1" />
+                                  Complete
+                                </Button>
+                              )}
+                              {booking.status !== "cancelled" && booking.status !== "completed" && (
+                                <Button
+                                  onClick={() => updateBookingStatus(booking.id, "cancelled")}
+                                  variant="outline"
+                                  size="sm"
+                                  className="transform hover:scale-105 transition-all duration-300 hover:bg-muted/50"
+                                >
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  Cancel
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card3D>
+                      </FloatingElement>
+                    ))}
+
+                    {filterBookings().length === 0 && (
+                      <FloatingElement delay={0.5}>
+                        <Card3D className="backdrop-blur-sm bg-card/90">
+                          <CardContent className="pt-6 text-center py-12">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-muted/50 to-background/50 flex items-center justify-center">
+                              <Calendar className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                            <p className="text-foreground text-lg font-medium">No bookings found</p>
+                            <p className="text-muted-foreground">Try adjusting your search or filters</p>
+                          </CardContent>
+                        </Card3D>
+                      </FloatingElement>
+                    )}
+                  </div>
+                </TabsContent>
+
+                {/* Customers Tab */}
+                <TabsContent value="customers">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {filteredUsers.map((userProfile, index) => (
+                      <FloatingElement key={userProfile.id} delay={index * 0.1}>
+                        <Card3D className="backdrop-blur-sm bg-card/90 border-border/50">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                                  <UserIcon className="h-6 w-6 text-accent" />
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold text-lg text-foreground group-hover:text-accent transition-colors duration-300">
+                                    {userProfile.full_name}
+                                  </h3>
+                                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                                    <span className="flex items-center gap-1">
+                                      <Mail className="h-4 w-4" />
+                                      {userProfile.email}
+                                    </span>
+                                    {userProfile.phone !== "Not provided" && (
+                                      <span className="flex items-center gap-1">
+                                        <Phone className="h-4 w-4" />
+                                        {userProfile.phone}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedUser(selectedUser === userProfile.id ? null : userProfile.id)}
+                                className="transform hover:scale-105 transition-all duration-300 hover:bg-muted/50"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                {selectedUser === userProfile.id ? "Hide" : "View"} Bookings
+                              </Button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="text-center p-3 bg-gradient-to-br from-accent/10 to-primary/10 rounded-lg border border-accent/20">
+                                <p className="text-sm text-muted-foreground">Total Bookings</p>
+                                <p className="font-bold text-xl bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+                                  {userProfile.total_bookings}
+                                </p>
+                              </div>
+                              <div className="text-center p-3 bg-gradient-to-br from-accent/10 to-primary/10 rounded-lg border border-accent/20">
+                                <p className="text-sm text-muted-foreground">Total Spent</p>
+                                <p className="font-bold text-xl bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+                                  £{userProfile.total_spent.toFixed(2)}
+                                </p>
+                              </div>
+                              <div className="text-center p-3 bg-gradient-to-br from-muted/30 to-background/30 rounded-lg border border-border/50">
+                                <p className="text-sm text-muted-foreground">Member Since</p>
+                                <p className="font-medium text-foreground">{new Date(userProfile.created_at).toLocaleDateString()}</p>
+                              </div>
+                              <div className="text-center p-3 bg-gradient-to-br from-muted/30 to-background/30 rounded-lg border border-border/50">
+                                <p className="text-sm text-muted-foreground">Last Booking</p>
+                                <p className="font-medium text-foreground">
+                                  {userProfile.last_booking !== "Never" 
+                                    ? new Date(userProfile.last_booking).toLocaleDateString()
+                                    : "Never"
+                                  }
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card3D>
+                      </FloatingElement>
+                    ))}
+
+                    {filteredUsers.length === 0 && (
+                      <div className="col-span-2">
+                        <FloatingElement delay={0.5}>
+                          <Card3D className="backdrop-blur-sm bg-card/90">
+                            <CardContent className="pt-6 text-center py-12">
+                              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-muted/50 to-background/50 flex items-center justify-center">
+                                <Users className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                              <p className="text-foreground text-lg font-medium">No customers found</p>
+                              <p className="text-muted-foreground">Try adjusting your search</p>
+                            </CardContent>
+                          </Card3D>
+                        </FloatingElement>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                {/* Services Tab */}
+                <TabsContent value="services">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {services
+                      .filter(s =>
+                        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        String(s.price).includes(searchTerm)
+                      )
+                      .map((service, index) => (
+                      <FloatingElement key={service.id} delay={index * 0.1}>
+                        <Card3D className="backdrop-blur-sm bg-card/90 border-border/50">
+                          <CardContent className="p-6">
+                      {editingServiceId === service.id ? (
+                        // Editing mode
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Service Name</label>
+                            <Input
+                              value={editingServiceName}
+                              onChange={(e) => setEditingServiceName(e.target.value)}
+                              className="mt-1"
+                              placeholder="Service name"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Price (£)</label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editingServicePrice}
+                              onChange={(e) => setEditingServicePrice(e.target.value)}
+                              className="mt-1"
+                              placeholder="0.00"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={saveServiceChanges} 
+                              className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 transform hover:scale-105 transition-all duration-300 shadow-lg"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Save Changes
+                            </Button>
+                            <Button 
+                              onClick={cancelEditService} 
+                              variant="outline"
+                              className="transform hover:scale-105 transition-all duration-300 hover:bg-muted/50"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        // Display mode
+                        <>
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg text-foreground mb-2 group-hover:text-accent transition-colors duration-300">
+                                {service.name}
+                              </h3>
+                              <Badge 
+                                variant={service.is_active ? "default" : "outline"} 
+                                className={`mb-3 cursor-pointer transform hover:scale-105 transition-all duration-300 ${
+                                  service.is_active 
+                                    ? "bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90" 
+                                    : ""
+                                }`}
+                                onClick={() => toggleServiceStatus(service.id, service.is_active)}
+                              >
+                                {service.is_active ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => startEditService(service)}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit Service
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => toggleServiceStatus(service.id, service.is_active)}
+                                >
+                                  <Activity className="h-4 w-4 mr-2" />
+                                  {service.is_active ? 'Deactivate' : 'Activate'}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center p-3 bg-gradient-to-br from-accent/10 to-primary/10 rounded-lg border border-accent/20">
+                              <span className="text-sm text-muted-foreground">Price</span>
+                              <span className="font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+                                £{service.price.toFixed(2)}
+                              </span>
+                            </div>
+                            {typeof service.duration_minutes === "number" && (
+                              <div className="flex justify-between items-center p-3 bg-gradient-to-br from-muted/30 to-background/30 rounded-lg border border-border/50">
+                                <span className="text-sm text-muted-foreground">Duration</span>
+                                <span className="font-medium text-foreground">{service.duration_minutes} min</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center p-3 bg-gradient-to-br from-muted/30 to-background/30 rounded-lg border border-border/50">
+                              <span className="text-sm text-muted-foreground">Created</span>
+                              <span className="font-medium text-foreground">{new Date(service.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                          </CardContent>
+                        </Card3D>
+                      </FloatingElement>
+                    ))}
+
+                    {services.length === 0 && (
+                      <div className="col-span-3">
+                        <FloatingElement delay={0.5}>
+                          <Card3D className="backdrop-blur-sm bg-card/90">
+                            <CardContent className="pt-6 text-center py-12">
+                              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-muted/50 to-background/50 flex items-center justify-center">
+                                <Briefcase className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                              <p className="text-foreground text-lg font-medium">No services found</p>
+                              <p className="text-muted-foreground">Add services to get started</p>
+                            </CardContent>
+                          </Card3D>
+                        </FloatingElement>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </FloatingElement>
+          </div>
+        </div>
+      </div>
+    </AnimatedBackground>
+  );
+};
+
+export default ModernAdmin;
