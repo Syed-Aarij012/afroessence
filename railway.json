@@ -1,11 +1,10 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "cd flair-appointment-18427 && npm ci && npm run build"
+    "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "cd flair-appointment-18427 && npm run preview -- --host 0.0.0.0 --port $PORT",
+    "startCommand": "npm run preview -- --host 0.0.0.0 --port $PORT",
     "runtime": "V2",
     "numReplicas": 1,
     "sleepApplication": false,
