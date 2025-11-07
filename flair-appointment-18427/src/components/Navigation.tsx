@@ -46,7 +46,6 @@ export const Navigation = () => {
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
     { to: "/gallery", label: "Gallery" },
-    { to: "/white-card", label: "White Card" },
     { to: "/contact", label: "Contact" },
   ];
 
