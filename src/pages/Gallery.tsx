@@ -1,35 +1,27 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
-import { Card3D, InteractiveCard } from "@/components/3D/Card3D";
+import { Card3D } from "@/components/3D/Card3D";
 import { AnimatedBackground } from "@/components/3D/AnimatedBackground";
 import { X, ZoomIn } from "lucide-react";
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Placeholder images - in production, these would come from a database or API
-  const galleryImages = {
-    locs: [
-      { id: 1, url: "https://images.unsplash.com/photo-1621607512214-68297480165e?w=500", alt: "Locs style 1" },
-      { id: 2, url: "https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=500", alt: "Locs style 2" },
-      { id: 3, url: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=500", alt: "Locs style 3" },
-      { id: 4, url: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=500", alt: "Locs style 4" },
-    ],
-    cuts: [
-      { id: 5, url: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500", alt: "Haircut 1" },
-      { id: 6, url: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=500", alt: "Haircut 2" },
-      { id: 7, url: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=500", alt: "Haircut 3" },
-      { id: 8, url: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=500", alt: "Haircut 4" },
-    ],
-    styling: [
-      { id: 9, url: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=500", alt: "Styling 1" },
-      { id: 10, url: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=500", alt: "Styling 2" },
-      { id: 11, url: "https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=500", alt: "Styling 3" },
-      { id: 12, url: "https://images.unsplash.com/photo-1621607512214-68297480165e?w=500", alt: "Styling 4" },
-    ],
-  };
+  // Locs gallery images
+  const galleryImages = [
+    { id: 1, url: "https://images.unsplash.com/photo-1621607512214-68297480165e?w=800&q=80", alt: "Natural locs style" },
+    { id: 2, url: "https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=800&q=80", alt: "Styled locs" },
+    { id: 3, url: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=800&q=80", alt: "Locs with pattern" },
+    { id: 4, url: "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=800&q=80", alt: "Long locs style" },
+    { id: 5, url: "https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?w=800&q=80", alt: "Colored locs" },
+    { id: 6, url: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=800&q=80", alt: "Locs updo" },
+    { id: 7, url: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800&q=80", alt: "Locs with accessories" },
+    { id: 8, url: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=800&q=80", alt: "Freeform locs" },
+    { id: 9, url: "https://images.unsplash.com/photo-1560264280-88b68371db39?w=800&q=80", alt: "Locs maintenance" },
+    { id: 10, url: "https://images.unsplash.com/photo-1598439210625-5067c578f3f6?w=800&q=80", alt: "Styled locs updo" },
+    { id: 11, url: "https://images.unsplash.com/photo-1595475884562-073c30d45670?w=800&q=80", alt: "Locs with highlights" },
+    { id: 12, url: "https://images.unsplash.com/photo-1543965170-4c01a586684e?w=800&q=80", alt: "Natural locs texture" },
+  ];
 
   return (
     <AnimatedBackground>
@@ -56,63 +48,34 @@ const Gallery = () => {
             </FloatingElement>
 
             <FloatingElement delay={0.5}>
-              <Tabs defaultValue="locs" className="w-full">
-                <div className="flex justify-center mb-8">
-                  <TabsList className="grid grid-cols-3 bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-lg">
-                    <TabsTrigger 
-                      value="locs" 
-                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
-                    >
-                      Locs
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="cuts"
-                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
-                    >
-                      Haircuts
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="styling"
-                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
-                    >
-                      Styling
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-
-                {Object.entries(galleryImages).map(([category, images]) => (
-                  <TabsContent key={category} value={category}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {images.map((image, index) => (
-                        <FloatingElement key={image.id} delay={index * 0.1}>
-                          <Card3D className="overflow-hidden cursor-pointer group">
-                            <div 
-                              className="relative"
-                              onClick={() => setSelectedImage(image.url)}
-                            >
-                              <img 
-                                src={image.url} 
-                                alt={image.alt}
-                                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                              />
-                              
-                              {/* Overlay */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                                  <ZoomIn className="h-6 w-6 text-white" />
-                                </div>
-                              </div>
-                              
-                              {/* Shimmer effect */}
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                            </div>
-                          </Card3D>
-                        </FloatingElement>
-                      ))}
-                    </div>
-                  </TabsContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {galleryImages.map((image, index) => (
+                  <FloatingElement key={image.id} delay={index * 0.1}>
+                    <Card3D className="overflow-hidden cursor-pointer group">
+                      <div 
+                        className="relative"
+                        onClick={() => setSelectedImage(image.url)}
+                      >
+                        <img 
+                          src={image.url} 
+                          alt={image.alt}
+                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 transform scale-0 group-hover:scale-100 transition-transform duration-300">
+                            <ZoomIn className="h-6 w-6 text-white" />
+                          </div>
+                        </div>
+                        
+                        {/* Shimmer effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      </div>
+                    </Card3D>
+                  </FloatingElement>
                 ))}
-              </Tabs>
+              </div>
             </FloatingElement>
           </div>
         </div>
