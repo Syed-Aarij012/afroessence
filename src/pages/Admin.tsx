@@ -44,6 +44,7 @@ import {
 import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
 import { Card3D, InteractiveCard } from "@/components/3D/Card3D";
 import { AnimatedBackground, ParallaxSection } from "@/components/3D/AnimatedBackground";
+import { AdminCalendar } from "@/components/AdminCalendar";
 
 interface Booking {
   id: string;
@@ -646,12 +647,18 @@ const ModernAdmin = () => {
             <FloatingElement delay={0.8}>
               <Tabs defaultValue="bookings" className="w-full">
                 <div className="flex justify-center mb-8">
-                  <TabsList className="grid grid-cols-3 bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-lg">
+                  <TabsList className="grid grid-cols-4 bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-lg">
                     <TabsTrigger 
                       value="bookings"
                       className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
                     >
                       Bookings ({bookings.length})
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="calendar"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Calendar
                     </TabsTrigger>
                     <TabsTrigger 
                       value="customers"
@@ -795,6 +802,23 @@ const ModernAdmin = () => {
                       </FloatingElement>
                     )}
                   </div>
+                </TabsContent>
+
+                {/* Calendar Tab */}
+                <TabsContent value="calendar">
+                  <FloatingElement delay={0.2}>
+                    <Card3D className="backdrop-blur-sm bg-card border-border shadow-xl">
+                      <CardContent className="p-6">
+                        <div className="mb-4">
+                          <h3 className="text-2xl font-bold bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
+                            Professional Booking Calendar
+                          </h3>
+                          <p className="text-muted-foreground">View and manage bookings by professional and time</p>
+                        </div>
+                        <AdminCalendar />
+                      </CardContent>
+                    </Card3D>
+                  </FloatingElement>
                 </TabsContent>
 
                 {/* Customers Tab */}
