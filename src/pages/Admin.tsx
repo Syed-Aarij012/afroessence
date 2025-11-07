@@ -42,7 +42,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
-import { Card, InteractiveCard } from "@/components/3D/Card";
 import { AnimatedBackground, ParallaxSection } from "@/components/3D/AnimatedBackground";
 import { AdminCalendar } from "@/components/AdminCalendar";
 
