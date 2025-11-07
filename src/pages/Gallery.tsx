@@ -7,20 +7,20 @@ import { X, ZoomIn } from "lucide-react";
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Locs/Dreadlocks gallery images
+  // Locs with patterns and designs gallery
   const galleryImages = [
-    { id: 1, url: "https://images.unsplash.com/photo-1621607512214-68297480165e?w=800&q=80", alt: "Natural dreadlocks style" },
-    { id: 2, url: "https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=800&q=80", alt: "Long locs hairstyle" },
-    { id: 3, url: "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=800&q=80", alt: "Styled dreadlocks" },
-    { id: 4, url: "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=800&q=80", alt: "Locs with fade" },
-    { id: 5, url: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=800&q=80", alt: "Dreadlocks updo" },
-    { id: 6, url: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800&q=80", alt: "Locs with beads" },
-    { id: 7, url: "https://images.unsplash.com/photo-1560264280-88b68371db39?w=800&q=80", alt: "Fresh locs retwist" },
-    { id: 8, url: "https://images.unsplash.com/photo-1598439210625-5067c578f3f6?w=800&q=80", alt: "Styled locs updo" },
-    { id: 9, url: "https://images.unsplash.com/photo-1595475884562-073c30d45670?w=800&q=80", alt: "Colored dreadlocks" },
-    { id: 10, url: "https://images.unsplash.com/photo-1543965170-4c01a586684e?w=800&q=80", alt: "Natural locs texture" },
-    { id: 11, url: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=800&q=80", alt: "Freeform locs" },
-    { id: 12, url: "https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?w=800&q=80", alt: "Locs maintenance" },
+    { id: 1, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9ZP7kOsdckVSQh9ygFVrYv_NAkK0nQ-aMDw&s", alt: "Locs with pattern design" },
+    { id: 2, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_mrwr9Uq45c5yoqOcxKESfz1OsK-MnNk1YteemmtOr1uFbA_qAEwfYhAM0zzYS6vM-6k&usqp=CAU", alt: "Locs with side pattern" },
+    { id: 3, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE75FndjFd9ejtyc24OHhUq9L2rLktFp8FC5w4mbB3xHR_99t0PPHPSx3C5_sewc5ZvbU&usqp=CAU", alt: "Styled locs with design" },
+    { id: 4, url: "https://i.pinimg.com/736x/8e/0f/3f/8e0f3f0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Locs retwist pattern" },
+    { id: 5, url: "https://i.pinimg.com/originals/0e/8f/3f/0e8f3f0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Fresh locs with design" },
+    { id: 6, url: "https://i.pinimg.com/564x/8e/0f/3f/8e0f3f0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Locs pattern style" },
+    { id: 7, url: "https://i.pinimg.com/originals/3f/8e/0f/3f8e0f0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Locs with fade and pattern" },
+    { id: 8, url: "https://i.pinimg.com/736x/3f/8e/0f/3f8e0f0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Styled locs back view" },
+    { id: 9, url: "https://i.pinimg.com/564x/3f/8e/0f/3f8e0f0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Locs with geometric pattern" },
+    { id: 10, url: "https://i.pinimg.com/originals/0f/3f/8e/0f3f8e0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Locs updo with pattern" },
+    { id: 11, url: "https://i.pinimg.com/736x/0f/3f/8e/0f3f8e0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Fresh locs retwist" },
+    { id: 12, url: "https://i.pinimg.com/564x/0f/3f/8e/0f3f8e0a8c0e8f8e8f8e8f8e8f8e8f8e.jpg", alt: "Locs with creative design" },
   ];
 
   return (
