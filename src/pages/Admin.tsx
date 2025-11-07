@@ -1035,12 +1035,11 @@ const ModernAdmin = () => {
                   </div>
                 </TabsContent>
               </Tabs>
-            </FloatingElement>
+            </div>
           </div>
         </div>
-      </div>
-    </AnimatedBackground>
-  );
-};
+      </AnimatedBackground>
+    );
+  };
 
 export default ModernAdmin;
