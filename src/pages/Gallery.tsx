@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
-import { Card3D } from "@/components/3D/Card3D";
 import { AnimatedBackground } from "@/components/3D/AnimatedBackground";
 import { X, ZoomIn } from "lucide-react";
 
@@ -41,7 +40,7 @@ const Gallery = () => {
             </FloatingElement>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {galleryImages.map((image, index) => (
+              {galleryImages.map((image) => (
                 <div key={image.id} className="w-full">
                   <div className="overflow-hidden cursor-pointer group rounded-lg border border-border shadow-md hover:shadow-xl transition-all duration-300">
                     <div 
