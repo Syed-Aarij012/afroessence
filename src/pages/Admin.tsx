@@ -399,7 +399,11 @@ const ModernAdmin = () => {
         .order("name");
 
       if (error) throw error;
-      setProfessionals(data || []);
+      // Filter out "Any professional" from the list
+      const filteredProfessionals = (data || []).filter(
+        (prof: any) => prof.name.toLowerCase() !== "any professional"
+      );
+      setProfessionals(filteredProfessionals);
     } catch (error) {
       console.error("Failed to load professionals:", error);
       toast.error("Failed to load professionals");

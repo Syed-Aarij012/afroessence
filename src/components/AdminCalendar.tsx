@@ -48,7 +48,11 @@ export const AdminCalendar = () => {
         .order("name");
 
       if (error) throw error;
-      setProfessionals(data || []);
+      // Filter out "Any professional" from the list
+      const filteredProfessionals = (data || []).filter(
+        (prof: any) => prof.name.toLowerCase() !== "any professional"
+      );
+      setProfessionals(filteredProfessionals);
     } catch (error) {
       console.error("Failed to load professionals:", error);
       toast.error("Failed to load professionals");
@@ -197,37 +201,76 @@ export const AdminCalendar = () => {
   return (
     <div className="space-y-4">
       {/* Calendar Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button onClick={goToPreviousWeek} variant="outline" size="sm">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="text-center min-w-[200px]">
-            <h3 className="font-semibold text-lg">
-              {startOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - {endOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-            </h3>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button onClick={goToPreviousWeek} variant="outline" size="sm">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="text-center min-w-[200px]">
+              <h3 className="font-semibold text-lg">
+                {startOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} - {endOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </h3>
+            </div>
+            <Button onClick={goToNextWeek} variant="outline" size="sm">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button onClick={goToToday} variant="outline" size="sm">
+              Today
+            </Button>
           </div>
-          <Button onClick={goToNextWeek} variant="outline" size="sm">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button onClick={goToToday} variant="outline" size="sm">
-            Today
-          </Button>
         </div>
 
-        <Select value={selectedProfessional} onValueChange={setSelectedProfessional}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="All Professionals" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Professionals</SelectItem>
-            {professionals.map(prof => (
-              <SelectItem key={prof.id} value={prof.id}>
-                {prof.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Professional Filter - Avatar Style */}
+        <div className="flex items-center gap-4 overflow-x-auto pb-2">
+          <button
+            onClick={() => setSelectedProfessional("all")}
+            className={`flex flex-col items-center gap-2 min-w-fit transition-all duration-300 ${
+              selectedProfessional === "all" ? "scale-110" : "opacity-60 hover:opacity-100"
+            }`}
+          >
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold transition-all duration-300 ${
+              selectedProfessional === "all" 
+                ? "bg-gradient-to-br from-accent to-primary text-white shadow-lg ring-4 ring-accent/30" 
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}>
+              All
+            </div>
+            <span className={`text-sm font-medium ${
+              selectedProfessional === "all" ? "text-accent" : "text-muted-foreground"
+            }`}>
+              All Professionals
+            </span>
+          </button>
+
+          {professionals.map(prof => {
+            // Get first letter of the name
+            const firstLetter = prof.name.trim()[0].toUpperCase();
+            
+            return (
+              <button
+                key={prof.id}
+                onClick={() => setSelectedProfessional(prof.id)}
+                className={`flex flex-col items-center gap-2 min-w-fit transition-all duration-300 ${
+                  selectedProfessional === prof.id ? "scale-110" : "opacity-60 hover:opacity-100"
+                }`}
+              >
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-300 ${
+                  selectedProfessional === prof.id 
+                    ? "bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg ring-4 ring-blue-400/30" 
+                    : "bg-blue-100 text-blue-600 hover:bg-blue-200 border-2 border-blue-300"
+                }`}>
+                  {firstLetter}
+                </div>
+                <span className={`text-sm font-medium ${
+                  selectedProfessional === prof.id ? "text-blue-600" : "text-muted-foreground"
+                }`}>
+                  {prof.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Calendar Grid */}
