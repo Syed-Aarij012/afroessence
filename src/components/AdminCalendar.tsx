@@ -283,19 +283,20 @@ export const AdminCalendar = () => {
                               <div
                                 key={booking.id}
                                 className={`text-xs p-2 rounded-md mb-1 cursor-pointer hover:opacity-80 transition-all border ${getStatusColor(booking.status)} shadow-sm hover:shadow-md`}
-                                title={`${booking.customer_name} - ${booking.service_name} (${booking.status})`}
+                                title={`${booking.professional_name} - ${booking.service_name} - ${booking.booking_time.substring(0, 5)} - ${booking.customer_name} (${booking.status})`}
                               >
                                 <div className="font-bold truncate">
-                                  {booking.customer_name}
+                                  👤 {booking.professional_name}
                                 </div>
                                 <div className="truncate text-xs opacity-90">
                                   {booking.service_name}
                                 </div>
-                                {selectedProfessional === "all" && (
-                                  <div className="truncate text-xs opacity-75 mt-1">
-                                    👤 {booking.professional_name}
-                                  </div>
-                                )}
+                                <div className="truncate text-xs opacity-75 mt-1">
+                                  ⏰ {booking.booking_time.substring(0, 5)}
+                                </div>
+                                <div className="truncate text-xs opacity-75">
+                                  {booking.customer_name}
+                                </div>
                               </div>
                             ))}
                           </div>

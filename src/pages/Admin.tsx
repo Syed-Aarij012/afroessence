@@ -53,8 +53,10 @@ interface Booking {
   notes: string;
   user_id: string;
   created_at: string;
-  services: { name: string; price: number };
-  professionals: { name: string };
+  service_id?: string;
+  professional_id?: string;
+  services: { id?: string; name: string; price: number };
+  professionals: { id?: string; name: string };
   profiles: { full_name: string; phone: string; email?: string };
 }
 
@@ -78,6 +80,13 @@ interface ServiceItem {
   created_at: string;
 }
 
+interface Professional {
+  id: string;
+  name: string;
+  title?: string;
+  is_active: boolean;
+}
+
 interface DashboardStats {
   totalUsers: number;
   totalBookings: number;
@@ -94,6 +103,7 @@ const ModernAdmin = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalBookings: 0,
@@ -109,6 +119,13 @@ const ModernAdmin = () => {
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [editingServicePrice, setEditingServicePrice] = useState<string>("");
   const [editingServiceName, setEditingServiceName] = useState<string>("");
+  const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
+  const [editingBookingData, setEditingBookingData] = useState<{
+    booking_date: string;
+    booking_time: string;
+    service_id: string;
+    professional_id: string;
+  } | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -148,6 +165,7 @@ const ModernAdmin = () => {
       loadBookings(),
       loadUsers(),
       loadServices(),
+      loadProfessionals(),
       loadStats()
     ]);
     setLoading(false);
@@ -179,25 +197,41 @@ const ModernAdmin = () => {
         .eq("booking_date", today);
 
       // Get revenue data - ONLY from completed bookings
-      const { data: revenueData } = await db
+      const { data: completedBookings } = await db
         .from("bookings")
-        .select("services(price), created_at")
+        .select("service_id, created_at")
         .eq("status", "completed");
 
-      const totalRevenue = revenueData?.reduce((sum, booking) => {
-        return sum + (booking.services?.price || 0);
+      // Get all services to calculate prices
+      const { data: servicesData } = await db
+        .from("services")
+        .select("id, price");
+
+      console.log("Completed bookings for revenue:", completedBookings?.length);
+      console.log("Services data:", servicesData?.length);
+
+      // Calculate total revenue
+      const totalRevenue = completedBookings?.reduce((sum, booking) => {
+        const service = servicesData?.find((s: any) => s.id === booking.service_id);
+        const price = service?.price || 0;
+        console.log(`Adding ${price} to revenue for booking ${booking.service_id}`);
+        return sum + price;
       }, 0) || 0;
 
       // Calculate monthly revenue (current month) - ONLY from completed bookings
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
-      const monthlyRevenue = revenueData?.reduce((sum, booking) => {
+      const monthlyRevenue = completedBookings?.reduce((sum, booking) => {
         const bookingDate = new Date(booking.created_at);
         if (bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear) {
-          return sum + (booking.services?.price || 0);
+          const service = servicesData?.find((s: any) => s.id === booking.service_id);
+          return sum + (service?.price || 0);
         }
         return sum;
       }, 0) || 0;
+
+      console.log("Total revenue calculated:", totalRevenue);
+      console.log("Monthly revenue calculated:", monthlyRevenue);
 
       setStats({
         totalUsers: userCount || 0,
@@ -255,10 +289,12 @@ const ModernAdmin = () => {
         return {
           ...booking,
           services: { 
+            id: service?.id,
             name: service?.name || "Unknown Service",
             price: service?.price || 0
           },
           professionals: { 
+            id: professional?.id,
             name: professional?.name || "Unknown Professional" 
           },
           profiles: {
@@ -355,7 +391,26 @@ const ModernAdmin = () => {
     }
   };
 
+  const loadProfessionals = async () => {
+    try {
+      const { data, error } = await db
+        .from("professionals")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setProfessionals(data || []);
+    } catch (error) {
+      console.error("Failed to load professionals:", error);
+      toast.error("Failed to load professionals");
+    }
+  };
+
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    // Find the booking to get its price for the toast message
+    const booking = bookings.find(b => b.id === bookingId);
+    const bookingPrice = booking?.services?.price || 0;
+    
     const { error } = await db
       .from("bookings")
       .update({ status: newStatus })
@@ -365,9 +420,121 @@ const ModernAdmin = () => {
       toast.error("Failed to update booking status");
       console.error(error);
     } else {
-      toast.success(`Booking ${newStatus} successfully`);
-      loadBookings();
-      loadStats(); // Refresh stats
+      // Show success message with price if completing
+      if (newStatus === "completed") {
+        toast.success(`Booking completed! £${bookingPrice.toFixed(2)} added to revenue 💰`);
+      } else {
+        toast.success(`Booking ${newStatus} successfully`);
+      }
+      
+      // Reload both bookings and stats to get updated data from database
+      await Promise.all([loadBookings(), loadStats()]);
+    }
+  };
+
+  const deleteBooking = async (bookingId: string) => {
+    // Confirm before deleting
+    if (!confirm("Are you sure you want to remove this booking? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const { error } = await db
+        .from("bookings")
+        .delete()
+        .eq("id", bookingId);
+
+      if (error) {
+        toast.error("Failed to remove booking");
+        console.error("Delete booking error:", error);
+        return;
+      }
+
+      toast.success("Booking removed successfully");
+      // Reload bookings and stats
+      await Promise.all([loadBookings(), loadStats()]);
+    } catch (error) {
+      toast.error("Failed to remove booking");
+      console.error("Exception deleting booking:", error);
+    }
+  };
+
+  const startEditBooking = (booking: Booking) => {
+    setEditingBookingId(booking.id);
+    // Format time to HH:MM for the input field (remove seconds if present)
+    const timeForInput = booking.booking_time.substring(0, 5);
+    setEditingBookingData({
+      booking_date: booking.booking_date,
+      booking_time: timeForInput,
+      service_id: booking.service_id || booking.services?.id || "",
+      professional_id: booking.professional_id || booking.professionals?.id || "",
+    });
+  };
+
+  const cancelEditBooking = () => {
+    setEditingBookingId(null);
+    setEditingBookingData(null);
+  };
+
+  const saveBookingChanges = async () => {
+    if (!editingBookingId || !editingBookingData) return;
+
+    // Validate the data
+    if (!editingBookingData.booking_date || !editingBookingData.booking_time || 
+        !editingBookingData.service_id || !editingBookingData.professional_id) {
+      toast.error("Please fill in all fields");
+      console.log("Validation failed:", editingBookingData);
+      return;
+    }
+
+    try {
+      // Ensure time is in HH:MM:SS format
+      let formattedTime = editingBookingData.booking_time;
+      if (formattedTime.length === 5) {
+        // If time is HH:MM, add :00 for seconds
+        formattedTime = `${formattedTime}:00`;
+      }
+
+      console.log("Updating booking with data:", {
+        booking_id: editingBookingId,
+        booking_date: editingBookingData.booking_date,
+        booking_time: formattedTime,
+        service_id: editingBookingData.service_id,
+        professional_id: editingBookingData.professional_id,
+      });
+
+      const { data, error } = await db
+        .from("bookings")
+        .update({
+          booking_date: editingBookingData.booking_date,
+          booking_time: formattedTime,
+          service_id: editingBookingData.service_id,
+          professional_id: editingBookingData.professional_id
+        })
+        .eq("id", editingBookingId)
+        .select();
+
+      if (error) {
+        toast.error(`Update failed: ${error.message}`);
+        console.error("Booking update error details:", {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        return;
+      }
+
+      console.log("Booking updated successfully:", data);
+      toast.success("Booking updated! Changes synced to user's bookings.");
+      setEditingBookingId(null);
+      setEditingBookingData(null);
+      // Refresh bookings list to show updated data
+      await loadBookings();
+    } catch (error: any) {
+      toast.error(`Failed to update booking: ${error?.message || 'Unknown error'}`);
+      console.error("Exception updating booking:", error);
     }
   };
 
@@ -557,14 +724,14 @@ const ModernAdmin = () => {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">
-                    Admin Dashboard
+                    Adilocs Dashboard
                   </h1>
                   <p className="text-muted-foreground text-base sm:text-lg">Manage your salon operations</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:block text-right backdrop-blur-sm bg-card/50 rounded-lg p-3 border border-border/50">
                     <p className="text-sm text-muted-foreground">Welcome back,</p>
-                    <p className="font-semibold text-foreground">Admin</p>
+                    <p className="font-semibold text-foreground">Adilocs</p>
                   </div>
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center shadow-lg">
                     <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
@@ -756,6 +923,86 @@ const ModernAdmin = () => {
                         </div>
                       )}
 
+                      {editingBookingId === booking.id && editingBookingData ? (
+                        <div className="mb-4 space-y-3 p-4 bg-muted/50 rounded-lg border border-border">
+                          <h4 className="font-semibold text-sm">Edit Booking Details</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs text-muted-foreground">Date</label>
+                              <Input
+                                type="date"
+                                value={editingBookingData.booking_date}
+                                onChange={(e) => setEditingBookingData({...editingBookingData, booking_date: e.target.value})}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground">Time</label>
+                              <Input
+                                type="time"
+                                value={editingBookingData.booking_time}
+                                onChange={(e) => setEditingBookingData({...editingBookingData, booking_time: e.target.value})}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground">Service</label>
+                              <Select 
+                                value={editingBookingData.service_id} 
+                                onValueChange={(value) => setEditingBookingData({...editingBookingData, service_id: value})}
+                              >
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {services.map(service => (
+                                    <SelectItem key={service.id} value={service.id}>
+                                      {service.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground">Professional</label>
+                              <Select 
+                                value={editingBookingData.professional_id} 
+                                onValueChange={(value) => setEditingBookingData({...editingBookingData, professional_id: value})}
+                              >
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {professionals.map(prof => (
+                                    <SelectItem key={prof.id} value={prof.id}>
+                                      {prof.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={saveBookingChanges}
+                              size="sm"
+                              className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Save Changes
+                            </Button>
+                            <Button 
+                              onClick={cancelEditBooking}
+                              size="sm"
+                              variant="outline"
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : null}
+
                             <div className="flex flex-wrap gap-2">
                               {booking.status === "pending" && (
                                 <Button
@@ -779,14 +1026,36 @@ const ModernAdmin = () => {
                                 </Button>
                               )}
                               {booking.status !== "cancelled" && booking.status !== "completed" && (
+                                <>
+                                  <Button
+                                    onClick={() => startEditBooking(booking)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="transform hover:scale-105 transition-all duration-300 hover:bg-muted/50"
+                                  >
+                                    <Edit className="h-4 w-4 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    onClick={() => updateBookingStatus(booking.id, "cancelled")}
+                                    variant="outline"
+                                    size="sm"
+                                    className="transform hover:scale-105 transition-all duration-300 hover:bg-muted/50"
+                                  >
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Cancel
+                                  </Button>
+                                </>
+                              )}
+                              {(booking.status === "completed" || booking.status === "cancelled") && (
                                 <Button
-                                  onClick={() => updateBookingStatus(booking.id, "cancelled")}
+                                  onClick={() => deleteBooking(booking.id)}
                                   variant="outline"
                                   size="sm"
-                                  className="transform hover:scale-105 transition-all duration-300 hover:bg-muted/50"
+                                  className="transform hover:scale-105 transition-all duration-300 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
                                 >
-                                  <XCircle className="h-4 w-4 mr-1" />
-                                  Cancel
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Remove
                                 </Button>
                               )}
                             </div>
