@@ -555,7 +555,10 @@ const ModernAdmin = () => {
   };
 
   const saveServiceChanges = async () => {
-    if (!editingServiceId) return;
+    if (!editingServiceId) {
+      toast.error("No service selected for editing");
+      return;
+    }
     
     const parsedPrice = Number(editingServicePrice);
     if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
@@ -569,29 +572,55 @@ const ModernAdmin = () => {
     }
 
     try {
-      const { error } = await db
+      console.log("Updating service:", {
+        id: editingServiceId,
+        name: editingServiceName.trim(),
+        price: parsedPrice
+      });
+
+      // Try updating with minimal fields first
+      const updateData: any = {
+        price: parsedPrice,
+        name: editingServiceName.trim()
+      };
+
+      console.log("Update data:", updateData);
+
+      const { data, error } = await supabase
         .from("services")
-        .update({ 
-          price: parsedPrice,
-          name: editingServiceName.trim(),
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", editingServiceId);
+        .update(updateData)
+        .eq("id", editingServiceId)
+        .select();
 
       if (error) {
-        toast.error("Failed to update service");
-        console.error("Service update error:", error);
+        console.error("Service update error details:", {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        
+        // Show more specific error message
+        if (error.code === '42501') {
+          toast.error("Permission denied. Please check admin access.");
+        } else if (error.code === '23505') {
+          toast.error("A service with this name already exists.");
+        } else {
+          toast.error(`Update failed: ${error.message}`);
+        }
         return;
       }
 
-      toast.success("Service updated successfully");
+      console.log("Service updated successfully:", data);
+      toast.success("Service updated successfully!");
       setEditingServiceId(null);
       setEditingServicePrice("");
       setEditingServiceName("");
-      loadServices(); // Refresh services list
-    } catch (error) {
-      toast.error("Failed to update service");
+      await loadServices(); // Refresh services list
+    } catch (error: any) {
       console.error("Exception updating service:", error);
+      toast.error(`Update failed: ${error?.message || 'Unknown error'}`);
     }
   };
 
