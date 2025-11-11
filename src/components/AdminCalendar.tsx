@@ -164,6 +164,52 @@ export const AdminCalendar = () => {
     );
   };
 
+  // Check if a booking spans this time slot
+  const isBookingInSlot = (booking: CalendarBooking, date: Date, time: string): boolean => {
+    const dateStr = date.toISOString().split('T')[0];
+    if (booking.booking_date !== dateStr) return false;
+
+    const bookingStartTime = booking.booking_time.substring(0, 5);
+    const [bookingHour, bookingMinute] = bookingStartTime.split(':').map(Number);
+    const bookingStartMinutes = bookingHour * 60 + bookingMinute;
+
+    const [slotHour, slotMinute] = time.split(':').map(Number);
+    const slotStartMinutes = slotHour * 60 + slotMinute;
+
+    // Always use 120 minutes (2 hours) for all bookings
+    const duration = 120;
+    const bookingEndMinutes = bookingStartMinutes + duration;
+
+    return slotStartMinutes >= bookingStartMinutes && slotStartMinutes < bookingEndMinutes;
+  };
+
+  // Check if this is the first slot of a booking (to render the booking card)
+  const isFirstSlotOfBooking = (booking: CalendarBooking, time: string): boolean => {
+    return booking.booking_time.substring(0, 5) === time;
+  };
+
+  // Calculate how many slots a booking spans
+  const getBookingSpanSlots = (booking: CalendarBooking): number => {
+    // Always use 120 minutes (2 hours) = 4 slots of 30 minutes each
+    return 4;
+  };
+
+  // Calculate the end time of a booking
+  const getBookingEndTime = (booking: CalendarBooking): string => {
+    const startTime = booking.booking_time.substring(0, 5);
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const startMinutes = startHour * 60 + startMinute;
+    
+    // Always use 120 minutes (2 hours) for all bookings
+    const duration = 120;
+    const endMinutes = startMinutes + duration;
+    
+    const endHour = Math.floor(endMinutes / 60);
+    const endMinute = endMinutes % 60;
+    
+    return `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+  };
+
   const goToPreviousWeek = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() - 7);
@@ -317,31 +363,40 @@ export const AdminCalendar = () => {
                         const slotBookings = getBookingsForSlot(day, time);
                         const isToday = day.toDateString() === new Date().toDateString();
                         
+                        // Find all bookings that span this slot
+                        const spanningBookings = bookings.filter(b => isBookingInSlot(b, day, time));
+                        
                         return (
                           <div 
                             key={dayIndex} 
                             className={`p-1 border-r last:border-r-0 relative ${isToday ? 'bg-accent/5' : ''}`}
                           >
-                            {slotBookings.map((booking) => (
-                              <div
-                                key={booking.id}
-                                className={`text-xs p-2 rounded-md mb-1 cursor-pointer hover:opacity-80 transition-all border ${getStatusColor(booking.status)} shadow-sm hover:shadow-md`}
-                                title={`${booking.professional_name} - ${booking.service_name} - ${booking.booking_time.substring(0, 5)} - ${booking.customer_name} (${booking.status})`}
-                              >
-                                <div className="font-bold truncate">
-                                  👤 {booking.professional_name}
+                            {slotBookings.map((booking) => {
+                              const spanSlots = getBookingSpanSlots(booking);
+                              const heightInPixels = spanSlots * 70 - 8; // 70px per slot minus padding
+                              
+                              return (
+                                <div
+                                  key={booking.id}
+                                  className={`text-xs p-2 rounded-md mb-1 cursor-pointer hover:opacity-80 transition-all border ${getStatusColor(booking.status)} shadow-sm hover:shadow-md absolute left-1 right-1 z-10`}
+                                  style={{ height: `${heightInPixels}px` }}
+                                  title={`${booking.professional_name} - ${booking.service_name} - ${booking.booking_time.substring(0, 5)} - ${booking.customer_name} (${booking.status})`}
+                                >
+                                  <div className="font-bold truncate text-sm">
+                                    {booking.booking_time.substring(0, 5)} - {getBookingEndTime(booking)}
+                                  </div>
+                                  <div className="truncate text-xs opacity-90 mt-1">
+                                    👤 {booking.professional_name}
+                                  </div>
+                                  <div className="truncate text-xs opacity-90">
+                                    {booking.service_name}
+                                  </div>
+                                  <div className="truncate text-xs opacity-75 mt-1">
+                                    {booking.customer_name}
+                                  </div>
                                 </div>
-                                <div className="truncate text-xs opacity-90">
-                                  {booking.service_name}
-                                </div>
-                                <div className="truncate text-xs opacity-75 mt-1">
-                                  ⏰ {booking.booking_time.substring(0, 5)}
-                                </div>
-                                <div className="truncate text-xs opacity-75">
-                                  {booking.customer_name}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         );
                       })}
