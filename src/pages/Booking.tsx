@@ -11,6 +11,7 @@ import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3
 import { Card3D, InteractiveCard } from "@/components/3D/Card3D";
 import { AnimatedBackground } from "@/components/3D/AnimatedBackground";
 import { CheckCircle, Clock, User as UserIcon, Calendar as CalendarIcon } from "lucide-react";
+import { useWeeklySchedule } from "@/hooks/useWeeklySchedule";
 
 // Helper function to format date without timezone conversion
 const formatDateForDatabase = (date: Date): string => {
@@ -46,6 +47,7 @@ interface Professional {
 
 const Booking = () => {
   const navigate = useNavigate();
+  const { getScheduleForDay } = useWeeklySchedule();
   const [user, setUser] = useState<User | null>(null);
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
@@ -145,6 +147,12 @@ const Booking = () => {
     if (!selectedDate) return [];
     
     const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const daySchedule = getScheduleForDay(dayOfWeek);
+    
+    // If day is closed or no schedule found, return empty array
+    if (!daySchedule || !daySchedule.is_open) {
+      return [];
+    }
     
     const slots = [];
     const now = new Date();
@@ -152,28 +160,27 @@ const Booking = () => {
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     
-    // Operating hours based on day of week
-    // Monday-Saturday: 09:00 - 21:00
-    // Sunday: 14:00 - 20:00
-    let startHour = 9;
-    let endHour = 21;
+    // Parse opening and closing times from schedule
+    const [openHour, openMinute] = daySchedule.opening_time.split(':').map(Number);
+    const [closeHour, closeMinute] = daySchedule.closing_time.split(':').map(Number);
+    const slotDuration = daySchedule.slot_duration_minutes;
     
-    if (dayOfWeek === 0) { // Sunday
-      startHour = 14;
-      endHour = 20;
-    }
+    // Convert times to minutes for easier calculation
+    const openingMinutes = openHour * 60 + openMinute;
+    const closingMinutes = closeHour * 60 + closeMinute;
     
-    // Generate slots every 15 minutes
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        // Skip past time slots if it's today
-        if (isToday && (hour < currentHour || (hour === currentHour && minute <= currentMinute))) {
-          continue;
-        }
-        
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
-        slots.push(time);
+    // Generate slots based on schedule
+    for (let totalMinutes = openingMinutes; totalMinutes < closingMinutes; totalMinutes += slotDuration) {
+      const hour = Math.floor(totalMinutes / 60);
+      const minute = totalMinutes % 60;
+      
+      // Skip past time slots if it's today
+      if (isToday && (hour < currentHour || (hour === currentHour && minute <= currentMinute))) {
+        continue;
       }
+      
+      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
+      slots.push(time);
     }
     
     return slots;

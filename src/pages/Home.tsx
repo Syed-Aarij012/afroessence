@@ -1,195 +1,150 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Scissors, Clock, Award, Users, Sparkles, Star } from "lucide-react";
-import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
-import { Card3D, InteractiveCard } from "@/components/3D/Card3D";
-import { AnimatedBackground, ParallaxSection } from "@/components/3D/AnimatedBackground";
+import { Sparkles, Calendar, Award, Heart } from "lucide-react";
 import heroImage from "@/assets/hero-bg.jpg";
 
 const Home = () => {
-  const features = [
-    {
-      icon: <Scissors className="h-8 w-8" />,
-      title: "Expert Styling",
-      description: "Professional locs maintenance and barbering services",
-      color: "from-blue-500 to-purple-600",
-    },
-    {
-      icon: <Clock className="h-8 w-8" />,
-      title: "Flexible Hours",
-      description: "Open 7 days a week to fit your schedule",
-      color: "from-green-500 to-teal-600",
-    },
-    {
-      icon: <Award className="h-8 w-8" />,
-      title: "Quality Service",
-      description: "Years of experience with exceptional results",
-      color: "from-yellow-500 to-orange-600",
-    },
-    {
-      icon: <Users className="h-8 w-8" />,
-      title: "Trusted by Many",
-      description: "Hundreds of satisfied clients in Peckham",
-      color: "from-pink-500 to-red-600",
-    },
-  ];
-
   return (
-    <AnimatedBackground>
-      <div className="min-h-screen">
-        <ParticleBackground />
+    <div className="min-h-screen bg-background">
+      {/* Hero Section - Full Screen with Overlay */}
+      <section 
+        className="relative min-h-screen flex items-center justify-center"
+        style={{
+          backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(20, 20, 20, 0.9) 50%, rgba(0, 0, 0, 0.85) 100%), url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundBlendMode: 'overlay'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
         
-        {/* Hero Section */}
-        <section 
-          className="relative h-screen flex items-center justify-center overflow-hidden"
-          style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${heroImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundAttachment: 'fixed',
-          }}
-        >
-          {/* Floating gradient orbs */}
-          <GradientOrb size={300} className="top-10 left-10" />
-          <GradientOrb size={200} color="primary" className="top-20 right-20" />
-          <GradientOrb size={150} className="bottom-20 left-1/4" />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+            <div className="inline-block">
+              <Sparkles className="w-16 h-16 mx-auto mb-4 animate-pulse text-amber-400" />
+            </div>
+            
+            <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400 bg-clip-text text-transparent">
+                AfroEssence
+              </span>
+              <span className="block text-5xl md:text-7xl mt-2 font-light text-white">BY K</span>
+            </h1>
+            
+            <p className="text-xl md:text-3xl font-light max-w-2xl mx-auto leading-relaxed text-gray-200">
+              Where Natural Beauty Meets Expert Care
+            </p>
+            
+            <div className="pt-8 flex gap-6 justify-center flex-wrap">
+              <Link to="/booking">
+                <Button size="lg" className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black text-xl px-12 py-7 rounded-full font-bold shadow-2xl shadow-amber-500/50 transform hover:scale-105 transition-all">
+                  Book Now
+                </Button>
+              </Link>
+              <Link to="/gallery">
+                <Button size="lg" variant="outline" className="border-2 border-amber-400 text-amber-400 hover:bg-amber-400/20 text-xl px-12 py-7 rounded-full font-semibold backdrop-blur-sm">
+                  View Gallery
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24 bg-gradient-to-b from-background to-muted">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-foreground mb-4">Why Choose Us</h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-yellow-600 mx-auto"></div>
+          </div>
           
-          {/* Floating decorative elements */}
-          <div className="absolute inset-0 pointer-events-none">
-            <FloatingElement delay={0} duration={4} amplitude={15}>
-              <Sparkles className="absolute top-20 left-20 h-6 w-6 text-accent/60" />
-            </FloatingElement>
-            <FloatingElement delay={1} duration={5} amplitude={20}>
-              <Star className="absolute top-40 right-32 h-4 w-4 text-primary/60" />
-            </FloatingElement>
-            <FloatingElement delay={2} duration={3.5} amplitude={12}>
-              <Sparkles className="absolute bottom-40 right-20 h-5 w-5 text-accent/40" />
-            </FloatingElement>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                icon: <Award className="w-12 h-12" />,
+                title: "Expert Stylists",
+                description: "Certified professionals with years of experience in natural hair care",
+                gradient: "from-amber-500 to-yellow-600"
+              },
+              {
+                icon: <Calendar className="w-12 h-12" />,
+                title: "Flexible Booking",
+                description: "Easy online booking system with flexible scheduling options",
+                gradient: "from-amber-600 to-orange-600"
+              },
+              {
+                icon: <Heart className="w-12 h-12" />,
+                title: "Premium Care",
+                description: "We use only the finest products for your hair's health and beauty",
+                gradient: "from-yellow-500 to-amber-500"
+              }
+            ].map((feature, index) => (
+              <Card key={index} className="border border-amber-500/20 shadow-xl hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300 transform hover:-translate-y-2 bg-card">
+                <CardContent className="p-8 text-center">
+                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br ${feature.gradient} text-black mb-6 shadow-lg shadow-amber-500/50`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        </div>
+      </section>
 
-          <div className="container mx-auto px-4 text-center text-white relative z-10">
-            <FloatingElement delay={0.5}>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-accent to-white bg-clip-text text-transparent animate-pulse">
-                AfroEssence <span className="text-accent drop-shadow-2xl">BY K</span>
-              </h1>
-            </FloatingElement>
-            
-            <FloatingElement delay={1}>
-              <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto backdrop-blur-sm bg-black/20 rounded-lg p-4">
-                Expert natural hair care and locs styling services in the heart of York
-              </p>
-            </FloatingElement>
-            
-            <FloatingElement delay={1.5}>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <Link to="/booking">
-                  <Button size="lg" className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-lg px-8 shadow-2xl shadow-accent/50 transform hover:scale-105 transition-all duration-300">
-                    Book Appointment
-                  </Button>
-                </Link>
-                <Link to="/about">
-                  <Button size="lg" variant="outline" className="text-lg px-8 bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white/20 transform hover:scale-105 transition-all duration-300 shadow-xl">
-                    Learn More
-                  </Button>
-                </Link>
-              </div>
-            </FloatingElement>
-          </div>
-        </section>
+      {/* CTA Section */}
+      <section className="py-24 bg-gradient-to-r from-black via-amber-950 to-black text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-amber-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-500 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
+            Ready to Transform Your Look?
+          </h2>
+          <p className="text-2xl mb-10 max-w-2xl mx-auto font-light text-gray-300">
+            Book your appointment today and experience the AfroEssence difference
+          </p>
+          <Link to="/booking">
+            <Button size="lg" className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black text-2xl px-16 py-8 rounded-full font-bold shadow-2xl shadow-amber-500/50 transform hover:scale-110 transition-all">
+              <Sparkles className="mr-3 h-6 w-6" />
+              Book Your Appointment
+            </Button>
+          </Link>
+        </div>
+      </section>
 
-        {/* Features Section */}
-        <ParallaxSection speed={-0.2}>
-          <section className="py-20 bg-gradient-to-br from-card via-background to-muted/50 relative">
-            {/* Background decorations */}
-            <div className="absolute inset-0 overflow-hidden">
-              <GradientOrb size={400} className="top-0 right-0 opacity-10" />
-              <GradientOrb size={300} color="primary" className="bottom-0 left-0 opacity-10" />
-            </div>
-            
-            <div className="container mx-auto px-4 relative z-10">
-              <FloatingElement delay={0}>
-                <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
-                  Why Choose Us
-                </h2>
-              </FloatingElement>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {features.map((feature, index) => (
-                  <FloatingElement key={index} delay={index * 0.2}>
-                    <Card3D className="h-full" intensity={0.8}>
-                      <CardContent className="pt-6 text-center h-full flex flex-col">
-                        <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${feature.color} text-white mb-4 shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                          {feature.icon}
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2 group-hover:text-accent transition-colors duration-300">
-                          {feature.title}
-                        </h3>
-                        <p className="text-muted-foreground flex-grow">
-                          {feature.description}
-                        </p>
-                      </CardContent>
-                    </Card3D>
-                  </FloatingElement>
-                ))}
-              </div>
-            </div>
-          </section>
-        </ParallaxSection>
-
-        {/* CTA Section */}
-        <ParallaxSection speed={0.1}>
-          <section className="py-20 bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground relative overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute inset-0">
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-transparent via-white/5 to-transparent animate-pulse" />
-              {Array.from({ length: 20 }, (_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-2 h-2 bg-white/20 rounded-full"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
-                    animationDelay: `${Math.random() * 2}s`,
-                  }}
-                />
-              ))}
-            </div>
-            
-            <div className="container mx-auto px-4 text-center relative z-10">
-              <FloatingElement delay={0}>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 drop-shadow-2xl">
-                  Ready for Your Transformation?
-                </h2>
-              </FloatingElement>
-              
-              <FloatingElement delay={0.5}>
-                <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90 backdrop-blur-sm bg-black/10 rounded-lg p-4">
-                  Book your appointment today and experience premium locs care and barbering
-                </p>
-              </FloatingElement>
-              
-              <FloatingElement delay={1}>
-                <Link to="/booking">
-                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8 shadow-2xl transform hover:scale-110 transition-all duration-300 hover:shadow-white/50">
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Book Now
-                  </Button>
-                </Link>
-              </FloatingElement>
-            </div>
-          </section>
-        </ParallaxSection>
-      </div>
-      
       <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.2; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.5); }
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
         }
       `}</style>
-    </AnimatedBackground>
+    </div>
   );
 };
 

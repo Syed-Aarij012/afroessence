@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { ScheduleManager } from "@/components/ScheduleManager";
 
 // Type-safe supabase client wrapper
 const db = supabase as any;
@@ -890,7 +891,7 @@ const ModernAdmin = () => {
             {/* Main Content Tabs */}
             <Tabs defaultValue="bookings" className="w-full">
               <div className="flex justify-center mb-4 sm:mb-8 overflow-x-auto">
-                <TabsList className="grid grid-cols-4 bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-lg min-w-max">
+                <TabsList className="grid grid-cols-5 bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-lg min-w-max">
                     <TabsTrigger 
                       value="bookings"
                       className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent data-[state=active]:to-primary data-[state=active]:text-white transition-all duration-300 text-xs sm:text-sm px-2 sm:px-4"
@@ -904,6 +905,13 @@ const ModernAdmin = () => {
                     >
                       <span className="hidden sm:inline">Calendar</span>
                       <span className="sm:hidden">Cal</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="schedule"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-yellow-600 data-[state=active]:text-black transition-all duration-300 text-xs sm:text-sm px-2 sm:px-4"
+                    >
+                      <span className="hidden sm:inline">Schedule</span>
+                      <span className="sm:hidden">Sch</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="customers"
@@ -1393,6 +1401,11 @@ const ModernAdmin = () => {
                       </div>
                     )}
                   </div>
+                </TabsContent>
+
+                {/* Schedule Tab */}
+                <TabsContent value="schedule" className="w-full">
+                  <ScheduleManager />
                 </TabsContent>
               </Tabs>
             </div>

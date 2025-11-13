@@ -50,14 +50,14 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 border-b border-border/50 shadow-lg">
+    <nav className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-md border-b border-amber-500/20 shadow-lg shadow-amber-500/5">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           <Link to="/" className="text-2xl font-bold transform hover:scale-105 transition-transform duration-300">
-            <span className="bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
               AfroEssence
             </span>{" "}
-            <span className="text-accent drop-shadow-sm">BY K</span>
+            <span className="text-amber-500 font-light">BY K</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -66,10 +66,10 @@ export const Navigation = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className="relative text-foreground/80 hover:text-accent transition-all duration-300 transform hover:scale-105 group"
+                className="relative text-foreground/80 hover:text-amber-500 transition-all duration-300 font-medium text-lg group"
               >
                 {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-primary transition-all duration-300 group-hover:w-full"></span>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-500 to-yellow-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
             ))}
             {user ? (
@@ -95,7 +95,7 @@ export const Navigation = () => {
               </Link>
             )}
             <Link to="/booking">
-              <Button className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-accent/25">
+              <Button className="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black rounded-full px-8 font-bold transform hover:scale-105 transition-all duration-300 shadow-lg shadow-amber-500/50">
                 Book Now
               </Button>
             </Link>

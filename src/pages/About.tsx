@@ -1,127 +1,98 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
-import { Card3D, InteractiveCard } from "@/components/3D/Card3D";
-import { AnimatedBackground, ParallaxSection } from "@/components/3D/AnimatedBackground";
-import { Award, Users, Heart, Lightbulb, Target, Star } from "lucide-react";
+import { Award, Users, Heart } from "lucide-react";
 import aboutImage from "@/assets/about-image.jpg";
 
 const About = () => {
   return (
-    <AnimatedBackground>
-      <div className="min-h-screen pt-24 pb-16 relative">
-        <ParticleBackground />
-        
-        {/* Background decorations */}
-        <GradientOrb size={400} className="top-20 right-10 opacity-15" />
-        <GradientOrb size={250} color="primary" className="bottom-40 left-20 opacity-15" />
-        <GradientOrb size={180} className="top-1/2 left-1/2 opacity-10" />
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <FloatingElement delay={0}>
-              <h1 className="text-5xl md:text-6xl font-bold mb-8 text-center bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">
-                About Us
-              </h1>
-            </FloatingElement>
-            
-            <ParallaxSection speed={-0.1}>
-              <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <FloatingElement delay={0.3}>
-                  <Card3D className="overflow-hidden h-full">
-                    <div className="relative group">
-                      <img 
-                        src={aboutImage} 
-                        alt="Professional locs styling" 
-                        className="rounded-lg w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-accent/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                  </Card3D>
-                </FloatingElement>
-                
-                <FloatingElement delay={0.5}>
-                  <div className="flex flex-col justify-center space-y-6">
-                    <div className="backdrop-blur-sm bg-card/80 rounded-lg p-6 border border-border/50">
-                      <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
-                        Welcome to Afro Essence
-                      </h2>
-                      <p className="text-muted-foreground mb-4 leading-relaxed">
-                        At Afro Essence, we celebrate the beauty and versatility of natural hair. 
-                        Our expert stylists specialize in locs, braids, and natural hair care, 
-                        bringing artistry and precision to every style we create.
-                      </p>
-                      <p className="text-muted-foreground leading-relaxed">
-                        We believe in enhancing your natural beauty while maintaining the health 
-                        and integrity of your hair. From traditional styles to modern trends, 
-                        we're dedicated to making you look and feel your absolute best.
-                      </p>
-                    </div>
-                  </div>
-                </FloatingElement>
-              </div>
-            </ParallaxSection>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
+      <div className="pt-32 pb-20">
+        <div className="container mx-auto px-4">
+          {/* Header */}
+          <div className="text-center mb-20">
+            <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-6">
+              About Us
+            </h1>
+            <div className="w-32 h-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 mx-auto"></div>
+          </div>
 
-
-
-            <ParallaxSection speed={-0.05}>
-              <div>
-                <FloatingElement delay={1}>
-                  <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
-                    Our Values
-                  </h2>
-                </FloatingElement>
-                
-                <div className="space-y-6">
-                  {[
-                    {
-                      title: "Expertise",
-                      description: "Our skilled stylists bring years of experience in natural hair care, locs maintenance, and creative styling techniques.",
-                      icon: <Target className="h-6 w-6" />,
-                      color: "from-purple-500 to-pink-600",
-                      delay: 1.1
-                    },
-                    {
-                      title: "Passion",
-                      description: "We love what we do and it shows in every style we create. Your satisfaction and confidence are our greatest rewards.",
-                      icon: <Heart className="h-6 w-6" />,
-                      color: "from-red-500 to-rose-600",
-                      delay: 1.2
-                    },
-                    {
-                      title: "Quality",
-                      description: "We use only premium products and proven techniques to ensure your hair stays healthy, strong, and beautiful.",
-                      icon: <Lightbulb className="h-6 w-6" />,
-                      color: "from-amber-500 to-yellow-600",
-                      delay: 1.3
-                    }
-                  ].map((value, index) => (
-                    <FloatingElement key={value.title} delay={value.delay}>
-                      <InteractiveCard className="backdrop-blur-sm bg-card/90">
-                        <CardContent className="pt-6">
-                          <div className="flex items-start gap-4">
-                            <div className={`p-3 rounded-full bg-gradient-to-br ${value.color} text-white shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                              {value.icon}
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-semibold mb-2 group-hover:text-accent transition-colors duration-300">
-                                {value.title}
-                              </h3>
-                              <p className="text-muted-foreground leading-relaxed">
-                                {value.description}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </InteractiveCard>
-                    </FloatingElement>
-                  ))}
+          {/* Main Content */}
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
+              <div className="order-2 md:order-1">
+                <h2 className="text-4xl font-bold text-foreground mb-6">
+                  Welcome to AfroEssence BY K
+                </h2>
+                <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+                  <p>
+                    At AfroEssence, we celebrate the beauty and versatility of natural hair. 
+                    Our expert stylists specialize in locs, braids, and natural hair care, 
+                    bringing artistry and precision to every style we create.
+                  </p>
+                  <p>
+                    We believe in enhancing your natural beauty while maintaining the health 
+                    and integrity of your hair. From traditional styles to modern trends, 
+                    we're dedicated to making you look and feel your absolute best.
+                  </p>
                 </div>
               </div>
-            </ParallaxSection>
+              
+              <div className="order-1 md:order-2">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-3xl transform rotate-3"></div>
+                  <img 
+                    src={aboutImage} 
+                    alt="AfroEssence Salon" 
+                    className="relative rounded-3xl shadow-2xl shadow-amber-500/20 w-full h-[500px] object-cover border-2 border-amber-500/30"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Values Section */}
+            <div className="mt-24">
+              <h2 className="text-4xl font-bold text-center text-foreground mb-16">Our Values</h2>
+              
+              <div className="grid md:grid-cols-3 gap-8">
+                {[
+                  {
+                    icon: <Award className="w-10 h-10" />,
+                    title: "Expertise",
+                    description: "Our skilled stylists bring years of experience in natural hair care, locs maintenance, and creative styling techniques.",
+                    color: "from-amber-500 to-yellow-600"
+                  },
+                  {
+                    icon: <Heart className="w-10 h-10" />,
+                    title: "Passion",
+                    description: "We love what we do and it shows in every style we create. Your satisfaction and confidence are our greatest rewards.",
+                    color: "from-yellow-500 to-amber-500"
+                  },
+                  {
+                    icon: <Users className="w-10 h-10" />,
+                    title: "Quality",
+                    description: "We use only premium products and proven techniques to ensure your hair stays healthy, strong, and beautiful.",
+                    color: "from-amber-600 to-orange-600"
+                  }
+                ].map((value, index) => (
+                  <Card key={index} className="border border-amber-500/20 shadow-xl hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300 transform hover:-translate-y-2 bg-card">
+                    <CardContent className="p-8">
+                      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${value.color} text-black mb-6 shadow-lg shadow-amber-500/50`}>
+                        {value.icon}
+                      </div>
+                      <h3 className="text-2xl font-bold text-foreground mb-4">
+                        {value.title}
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {value.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </AnimatedBackground>
+    </div>
   );
 };
 
