@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
   preview: {
     host: "0.0.0.0",
     port: 4173,
-    allowedHosts: ["adilocss-production.up.railway.app"]
+    allowedHosts: ["afroessence-production.up.railway.app"]
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
