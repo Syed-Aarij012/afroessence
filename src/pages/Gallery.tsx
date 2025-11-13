@@ -2,17 +2,36 @@ import { useState } from "react";
 import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
 import { AnimatedBackground } from "@/components/3D/AnimatedBackground";
 import { X, ZoomIn } from "lucide-react";
+import gallery1 from "@/assets/gallery1.jpg";
+import gallery2 from "@/assets/gallery2.jpg";
+import gallery3 from "@/assets/gallery3.jpg";
+import gallery4 from "@/assets/gallery4.jpg";
+import gallery5 from "@/assets/gallery5.jpg";
+import gallery6 from "@/assets/gallery6.jpg";
+import gallery11 from "@/assets/gallery11.jpg";
+import gallery12 from "@/assets/gallery12.jpg";
+import gallery13 from "@/assets/gallery13.jpg";
+import gallery14 from "@/assets/gallery14.jpg";
+import gallery15 from "@/assets/gallery15.jpg";
+import gallery16 from "@/assets/gallery16.jpg";
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Locs with patterns and designs gallery
+  // Locs with patterns and designs gallery - mixed order
   const galleryImages = [
-    { id: 1, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9ZP7kOsdckVSQh9ygFVrYv_NAkK0nQ-aMDw&s", alt: "Locs with pattern design" },
-    { id: 2, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_mrwr9Uq45c5yoqOcxKESfz1OsK-MnNk1YteemmtOr1uFbA_qAEwfYhAM0zzYS6vM-6k&usqp=CAU", alt: "Locs with side pattern" },
-    { id: 3, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE75FndjFd9ejtyc24OHhUq9L2rLktFp8FC5w4mbB3xHR_99t0PPHPSx3C5_sewc5ZvbU&usqp=CAU", alt: "Styled locs with design" },
-    { id: 4, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT39B2zUPt4pocDwBMt6cYh0iJFPuYDI07i7aS7RI0jwfM3ddacWoNzeVlKUCsyvxQU9g&usqp=CAU", alt: "Locs retwist pattern" },
-    { id: 5, url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCMdquq7ryPd4JmcqyNKMv7-Ikvebnd1ldXg&s", alt: "Fresh locs with design" },
+    { id: 1, url: gallery1, alt: "Natural hair styling" },
+    { id: 2, url: gallery13, alt: "Creative styling" },
+    { id: 3, url: gallery2, alt: "Locs maintenance" },
+    { id: 4, url: gallery14, alt: "Hair artistry" },
+    { id: 5, url: gallery3, alt: "Creative hair design" },
+    { id: 6, url: gallery15, alt: "Professional work" },
+    { id: 7, url: gallery4, alt: "Professional styling" },
+    { id: 8, url: gallery16, alt: "Beautiful design" },
+    { id: 9, url: gallery5, alt: "Hair artistry" },
+    { id: 10, url: gallery11, alt: "Stunning style" },
+    { id: 11, url: gallery6, alt: "Beautiful locs" },
+    { id: 12, url: gallery12, alt: "Expert styling" },
   ];
 
   return (

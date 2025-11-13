@@ -71,13 +71,13 @@ const Home = () => {
           <div className="container mx-auto px-4 text-center text-white relative z-10">
             <FloatingElement delay={0.5}>
               <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-accent to-white bg-clip-text text-transparent animate-pulse">
-                Premium Locs <span className="text-accent drop-shadow-2xl">Styling</span>
+                AfroEssence <span className="text-accent drop-shadow-2xl">BY K</span>
               </h1>
             </FloatingElement>
             
             <FloatingElement delay={1}>
               <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto backdrop-blur-sm bg-black/20 rounded-lg p-4">
-                Expert care for your locs and exceptional barbering services in the heart of Peckham
+                Expert natural hair care and locs styling services in the heart of York
               </p>
             </FloatingElement>
             

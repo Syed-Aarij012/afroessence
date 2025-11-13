@@ -132,9 +132,9 @@ const Contact = () => {
                     title: "Address",
                     content: (
                       <>
-                        12 Choumert Rd<br />
-                        London SE15 4SE<br />
-                        United Kingdom
+                        Suite 114, Phenix Salon<br />
+                        1 Micklegate<br />
+                        York
                       </>
                     ),
                     color: "from-blue-500 to-purple-600",
@@ -144,8 +144,8 @@ const Contact = () => {
                     icon: <Phone className="h-6 w-6" />,
                     title: "Phone",
                     content: (
-                      <a href="tel:+447958938820" className="hover:text-accent transition-colors">
-                        +44 7958 938820
+                      <a href="tel:+447823712141" className="hover:text-accent transition-colors">
+                        07823 712141
                       </a>
                     ),
                     color: "from-green-500 to-teal-600",
@@ -154,14 +154,19 @@ const Contact = () => {
                   {
                     icon: <Mail className="h-6 w-6" />,
                     title: "Email",
-                    content: "info@adiscolocs.com",
+                    content: "hello@afroessencebyk.uk",
                     color: "from-orange-500 to-red-600",
                     delay: 0.8
                   },
                   {
                     icon: <Clock className="h-6 w-6" />,
                     title: "Opening Hours",
-                    content: "Every Day: 10:00 AM - 8:00 PM",
+                    content: (
+                      <>
+                        Mon-Sat: 09:00 - 21:00<br />
+                        Sunday: 14:00 - 20:00
+                      </>
+                    ),
                     color: "from-pink-500 to-purple-600",
                     delay: 0.9
                   }

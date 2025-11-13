@@ -8,10 +8,10 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">
-              Adisco <span className="text-accent">Locs</span>
+              AfroEssence <span className="text-accent">BY K</span>
             </h3>
             <p className="text-muted-foreground">
-              Professional locs styling and barbershop services in Peckham.
+              Professional natural hair styling and locs services in York.
             </p>
           </div>
 
@@ -39,7 +39,8 @@ export const Footer = () => {
               <div className="flex items-start gap-2">
                 <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p>Every Day: 10:00 AM - 8:00 PM</p>
+                  <p>Mon-Sat: 09:00 - 21:00</p>
+                  <p>Sunday: 14:00 - 20:00</p>
                 </div>
               </div>
             </div>
@@ -50,18 +51,18 @@ export const Footer = () => {
             <div className="space-y-2 text-muted-foreground">
               <div className="flex items-start gap-2">
                 <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                <p>12 Choumert Rd, London SE15 4SE, United Kingdom</p>
+                <p>Suite 114, Phenix Salon, 1 Micklegate York</p>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-5 w-5 flex-shrink-0" />
-                <a href="tel:+447958938820" className="hover:text-accent transition-colors">
-                  +44 7958 938820
+                <a href="tel:+447823712141" className="hover:text-accent transition-colors">
+                  07823 712141
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-5 w-5 flex-shrink-0" />
-                <a href="mailto:info@adiscolocs.com" className="hover:text-accent transition-colors">
-                  info@adiscolocs.com
+                <a href="mailto:hello@afroessencebyk.uk" className="hover:text-accent transition-colors">
+                  hello@afroessencebyk.uk
                 </a>
               </div>
             </div>
@@ -69,7 +70,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Adisco Locs Stylist. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} AfroEssence BY K. All rights reserved.</p>
         </div>
       </div>
     </footer>

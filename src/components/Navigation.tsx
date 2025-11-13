@@ -55,9 +55,9 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="text-2xl font-bold transform hover:scale-105 transition-transform duration-300">
             <span className="bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
-              Adisco
+              AfroEssence
             </span>{" "}
-            <span className="text-accent drop-shadow-sm">Locs</span>
+            <span className="text-accent drop-shadow-sm">BY K</span>
           </Link>
 
           {/* Desktop Navigation */}

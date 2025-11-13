@@ -26,6 +26,15 @@ interface Service {
   description: string;
   duration_minutes: number;
   price: number;
+  category?: string;
+  parent_id?: string;
+}
+
+interface ServiceCategory {
+  name: string;
+  description: string;
+  services: Service[];
+  subcategories?: ServiceCategory[];
 }
 
 interface Professional {
@@ -47,6 +56,7 @@ const Booking = () => {
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -136,28 +146,34 @@ const Booking = () => {
     
     const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     
-    // Sunday is closed
-    if (dayOfWeek === 0) {
-      return [];
-    }
-    
     const slots = [];
     const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
     const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
     
-    // Monday to Friday: 10 AM, 12 PM, 2 PM, 4 PM (10:00, 12:00, 14:00, 16:00)
-    // Saturday: 10 AM, 12 PM, 2 PM (10:00, 12:00, 14:00)
-    const endHour = dayOfWeek === 6 ? 14 : 16; // Saturday ends at 2 PM (14:00), weekdays at 4 PM (16:00)
+    // Operating hours based on day of week
+    // Monday-Saturday: 09:00 - 21:00
+    // Sunday: 14:00 - 20:00
+    let startHour = 9;
+    let endHour = 21;
     
-    for (let hour = 10; hour <= endHour; hour += 2) {
-      // Skip past time slots if it's today
-      if (isToday && hour <= currentHour) {
-        continue;
+    if (dayOfWeek === 0) { // Sunday
+      startHour = 14;
+      endHour = 20;
+    }
+    
+    // Generate slots every 15 minutes
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minute = 0; minute < 60; minute += 15) {
+        // Skip past time slots if it's today
+        if (isToday && (hour < currentHour || (hour === currentHour && minute <= currentMinute))) {
+          continue;
+        }
+        
+        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
+        slots.push(time);
       }
-      
-      const time = `${hour.toString().padStart(2, '0')}:00:00`;
-      slots.push(time);
     }
     
     return slots;
@@ -279,38 +295,156 @@ const Booking = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4">
-                      {services.map((service, index) => (
-                        <FloatingElement key={service.id} delay={index * 0.1}>
-                          <InteractiveCard
-                            className={`cursor-pointer transition-all duration-300 ${
-                              selectedService === service.id 
-                                ? "ring-2 ring-accent shadow-lg shadow-accent/25" 
-                                : ""
-                            }`}
-                          >
-                            <CardContent 
-                              className="pt-6"
-                              onClick={() => setSelectedService(service.id)}
-                            >
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-semibold text-lg group-hover:text-accent transition-colors">
-                                    {service.name}
-                                  </h3>
-                                  <p className="text-muted-foreground text-sm">{service.description}</p>
-                                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
-                                    <Clock className="h-4 w-4 mr-1" />
-                                    {service.duration_minutes} minutes
+                      {(() => {
+                        const toggleCategory = (categoryPath: string) => {
+                          const newExpanded = new Set(expandedCategories);
+                          if (newExpanded.has(categoryPath)) {
+                            newExpanded.delete(categoryPath);
+                          } else {
+                            newExpanded.add(categoryPath);
+                          }
+                          setExpandedCategories(newExpanded);
+                        };
+
+                        // Build hierarchical structure from flat services list
+                        const buildHierarchy = (parentCategory: string = "", level: number = 0): any[] => {
+                          const items: any[] = [];
+                          const categoryMap: { [key: string]: Service[] } = {};
+                          
+                          services.forEach(service => {
+                            if (!service.category) return;
+                            
+                            const parts = service.category.split(' > ');
+                            const currentLevel = parts.slice(0, level + 1).join(' > ');
+                            const parentLevel = parts.slice(0, level).join(' > ');
+                            
+                            if (parentLevel === parentCategory && parts.length > level) {
+                              const categoryName = parts[level];
+                              const fullPath = parts.slice(0, level + 1).join(' > ');
+                              
+                              if (!categoryMap[fullPath]) {
+                                categoryMap[fullPath] = [];
+                              }
+                              
+                              // Only add if this is the final level for this service
+                              if (parts.length === level + 1) {
+                                categoryMap[fullPath].push(service);
+                              }
+                            }
+                          });
+
+                          Object.entries(categoryMap).forEach(([fullPath, categoryServices]) => {
+                            const parts = fullPath.split(' > ');
+                            const categoryName = parts[parts.length - 1];
+                            const hasSubcategories = services.some(s => 
+                              s.category && s.category.startsWith(fullPath + ' > ')
+                            );
+
+                            items.push({
+                              name: categoryName,
+                              fullPath,
+                              services: categoryServices,
+                              hasSubcategories,
+                              level
+                            });
+                          });
+
+                          return items;
+                        };
+
+                        const renderCategory = (item: any, index: number) => {
+                          const isExpanded = expandedCategories.has(item.fullPath);
+                          const indent = item.level * 20;
+
+                          return (
+                            <div key={item.fullPath}>
+                              <InteractiveCard className="overflow-hidden">
+                                <CardContent className="p-0">
+                                  {/* Category Header */}
+                                  <div
+                                    className="p-4 cursor-pointer hover:bg-muted/50 transition-all duration-300"
+                                    style={{ paddingLeft: `${16 + indent}px` }}
+                                    onClick={() => toggleCategory(item.fullPath)}
+                                  >
+                                    <div className="flex justify-between items-center">
+                                      <div>
+                                        <h3 className={`font-semibold ${item.level === 0 ? 'text-lg' : 'text-base'} group-hover:text-accent transition-colors`}>
+                                          {item.name}
+                                        </h3>
+                                        {item.hasSubcategories && (
+                                          <p className="text-muted-foreground text-sm">
+                                            Click to view options
+                                          </p>
+                                        )}
+                                      </div>
+                                      {(item.hasSubcategories || item.services.length > 0) && (
+                                        <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                                          <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                          </svg>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="text-accent font-bold text-xl bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-                                  £{service.price.toFixed(2)}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </InteractiveCard>
-                        </FloatingElement>
-                      ))}
+
+                                  {/* Expanded Content */}
+                                  {isExpanded && (
+                                    <div className="border-t border-border/50 bg-muted/10">
+                                      {/* Render subcategories */}
+                                      {item.hasSubcategories && (
+                                        <div className="space-y-2 p-2">
+                                          {buildHierarchy(item.fullPath, item.level + 1).map((subItem, subIndex) => 
+                                            renderCategory(subItem, subIndex)
+                                          )}
+                                        </div>
+                                      )}
+                                      
+                                      {/* Render services at this level */}
+                                      {item.services.length > 0 && (
+                                        <div>
+                                          {item.services.map((service: Service) => (
+                                            <div
+                                              key={service.id}
+                                              className={`p-4 border-b border-border/30 last:border-b-0 cursor-pointer hover:bg-accent/5 transition-all duration-300 ${
+                                                selectedService === service.id ? 'bg-accent/10 border-l-4 border-l-accent' : ''
+                                              }`}
+                                              style={{ paddingLeft: `${24 + indent}px` }}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedService(service.id);
+                                              }}
+                                            >
+                                              <div className="flex justify-between items-start">
+                                                <div className="flex-1">
+                                                  <h4 className="font-medium text-base">
+                                                    {service.name}
+                                                  </h4>
+                                                  {service.description && (
+                                                    <p className="text-muted-foreground text-sm mt-1">{service.description}</p>
+                                                  )}
+                                                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                                                    <Clock className="h-4 w-4 mr-1" />
+                                                    {service.duration_minutes} min
+                                                  </div>
+                                                </div>
+                                                <div className="text-accent font-bold text-lg ml-4">
+                                                  £{service.price.toFixed(2)}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </InteractiveCard>
+                            </div>
+                          );
+                        };
+
+                        return buildHierarchy().map((item, index) => renderCategory(item, index));
+                      })()}
                     </div>
                     <Button
                       className="w-full mt-6 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 transform hover:scale-105 transition-all duration-300 shadow-lg"

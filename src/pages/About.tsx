@@ -43,16 +43,17 @@ const About = () => {
                   <div className="flex flex-col justify-center space-y-6">
                     <div className="backdrop-blur-sm bg-card/80 rounded-lg p-6 border border-border/50">
                       <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
-                        Our Story
+                        Welcome to Afro Essence
                       </h2>
                       <p className="text-muted-foreground mb-4 leading-relaxed">
-                        Adisco Locs Stylist has been serving the Peckham community for years, 
-                        providing exceptional locs maintenance and barbering services. Our passion 
-                        is helping clients look and feel their best through expert styling and care.
+                        At Afro Essence, we celebrate the beauty and versatility of natural hair. 
+                        Our expert stylists specialize in locs, braids, and natural hair care, 
+                        bringing artistry and precision to every style we create.
                       </p>
                       <p className="text-muted-foreground leading-relaxed">
-                        Located on Choumert Road, we've built a reputation for quality, 
-                        professionalism, and creating a welcoming atmosphere for all our clients.
+                        We believe in enhancing your natural beauty while maintaining the health 
+                        and integrity of your hair. From traditional styles to modern trends, 
+                        we're dedicated to making you look and feel your absolute best.
                       </p>
                     </div>
                   </div>
@@ -60,29 +61,7 @@ const About = () => {
               </div>
             </ParallaxSection>
 
-            <ParallaxSection speed={0.1}>
-              <div className="grid md:grid-cols-3 gap-6 mb-12">
-                {[
-                  { number: "10+", label: "Years Experience", icon: <Award className="h-8 w-8" />, color: "from-blue-500 to-purple-600", delay: 0.7 },
-                  { number: "500+", label: "Happy Clients", icon: <Users className="h-8 w-8" />, color: "from-green-500 to-teal-600", delay: 0.8 },
-                  { number: "100%", label: "Satisfaction", icon: <Star className="h-8 w-8" />, color: "from-yellow-500 to-orange-600", delay: 0.9 }
-                ].map((stat, index) => (
-                  <FloatingElement key={stat.label} delay={stat.delay}>
-                    <Card3D className="backdrop-blur-sm bg-card/90">
-                      <CardContent className="pt-6 text-center">
-                        <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${stat.color} text-white mb-4 shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                          {stat.icon}
-                        </div>
-                        <div className="text-4xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent mb-2 animate-pulse">
-                          {stat.number}
-                        </div>
-                        <p className="text-muted-foreground font-medium">{stat.label}</p>
-                      </CardContent>
-                    </Card3D>
-                  </FloatingElement>
-                ))}
-              </div>
-            </ParallaxSection>
+
 
             <ParallaxSection speed={-0.05}>
               <div>
@@ -95,22 +74,22 @@ const About = () => {
                 <div className="space-y-6">
                   {[
                     {
-                      title: "Excellence",
-                      description: "We strive for perfection in every cut, style, and service we provide.",
+                      title: "Expertise",
+                      description: "Our skilled stylists bring years of experience in natural hair care, locs maintenance, and creative styling techniques.",
                       icon: <Target className="h-6 w-6" />,
                       color: "from-purple-500 to-pink-600",
                       delay: 1.1
                     },
                     {
-                      title: "Community",
-                      description: "We're proud to be part of the Peckham community and serve our neighbors.",
+                      title: "Passion",
+                      description: "We love what we do and it shows in every style we create. Your satisfaction and confidence are our greatest rewards.",
                       icon: <Heart className="h-6 w-6" />,
                       color: "from-red-500 to-rose-600",
                       delay: 1.2
                     },
                     {
-                      title: "Innovation",
-                      description: "We stay updated with the latest techniques and trends in hair care.",
+                      title: "Quality",
+                      description: "We use only premium products and proven techniques to ensure your hair stays healthy, strong, and beautiful.",
                       icon: <Lightbulb className="h-6 w-6" />,
                       color: "from-amber-500 to-yellow-600",
                       delay: 1.3
