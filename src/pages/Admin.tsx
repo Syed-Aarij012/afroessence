@@ -797,14 +797,14 @@ const ModernAdmin = () => {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">
-                    Adilocs Dashboard
+                    AfroEssence Dashboard
                   </h1>
                   <p className="text-muted-foreground text-base sm:text-lg">Manage your salon operations</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:block text-right backdrop-blur-sm bg-card/50 rounded-lg p-3 border border-border/50">
                     <p className="text-sm text-muted-foreground">Welcome back,</p>
-                    <p className="font-semibold text-foreground">Adilocs</p>
+                    <p className="font-semibold text-foreground">AfroEssence</p>
                   </div>
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent to-primary rounded-full flex items-center justify-center shadow-lg">
                     <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
