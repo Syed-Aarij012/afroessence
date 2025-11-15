@@ -164,7 +164,7 @@ const Contact = () => {
                     content: (
                       <>
                         Mon-Sat: 09:00 - 21:00<br />
-                        Sunday: 14:00 - 20:00
+                        Sunday: 14:00 - 19:00
                       </>
                     ),
                     color: "from-pink-500 to-purple-600",

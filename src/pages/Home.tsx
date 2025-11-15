@@ -33,7 +33,7 @@ const Home = () => {
             </h1>
             
             <p className="text-xl md:text-3xl font-light max-w-2xl mx-auto leading-relaxed text-gray-200">
-              Where Natural Beauty Meets Expert Care
+              Professional Hair Braiding and Beauty Services in York
             </p>
             
             <div className="pt-8 flex gap-6 justify-center flex-wrap">

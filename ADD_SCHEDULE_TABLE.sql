@@ -47,7 +47,7 @@ CREATE POLICY "Admins can manage schedule"
 
 -- Insert default schedule (Monday-Saturday: 09:00-21:00, Sunday: 14:00-20:00)
 INSERT INTO public.weekly_schedule (day_of_week, is_open, opening_time, closing_time, slot_duration_minutes) VALUES
-(0, true, '14:00:00', '20:00:00', 15), -- Sunday
+(0, true, '14:00:00', '19:00:00', 15), -- Sunday
 (1, true, '09:00:00', '21:00:00', 15), -- Monday
 (2, true, '09:00:00', '21:00:00', 15), -- Tuesday
 (3, true, '09:00:00', '21:00:00', 15), -- Wednesday

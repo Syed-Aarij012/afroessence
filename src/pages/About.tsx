@@ -24,14 +24,13 @@ const About = () => {
                 </h2>
                 <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
                   <p>
-                    At AfroEssence, we celebrate the beauty and versatility of natural hair. 
-                    Our expert stylists specialize in locs, braids, and natural hair care, 
-                    bringing artistry and precision to every style we create.
+                    AfroEssence by K seamlessly blends Afro and Western beauty traditions, creating a vibrant atmosphere where everyone feels welcome. This inclusive salon caters to men, women, and children, offering an array of services from stylish hairstyles to relaxing blow dries.
                   </p>
                   <p>
-                    We believe in enhancing your natural beauty while maintaining the health 
-                    and integrity of your hair. From traditional styles to modern trends, 
-                    we're dedicated to making you look and feel your absolute best.
+                    With a commitment to exceptional service and accessibility, AfroEssence by K ensures that every visit is a celebration of individuality and style.
+                  </p>
+                  <p className="text-sm italic">
+                    AfroEssence by K is a trading name under AFROYA STUDIO LTD.
                   </p>
                 </div>
               </div>

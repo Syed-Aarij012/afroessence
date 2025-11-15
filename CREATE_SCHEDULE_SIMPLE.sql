@@ -42,7 +42,7 @@ CREATE POLICY "Admin full access"
 -- Step 5: Insert default schedule
 INSERT INTO public.weekly_schedule (day_of_week, is_open, opening_time, closing_time, slot_duration_minutes) 
 VALUES
-  (0, true, '14:00:00', '20:00:00', 15),
+  (0, true, '14:00:00', '19:00:00', 15),
   (1, true, '09:00:00', '21:00:00', 15),
   (2, true, '09:00:00', '21:00:00', 15),
   (3, true, '09:00:00', '21:00:00', 15),

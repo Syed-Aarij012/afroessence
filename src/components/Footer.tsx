@@ -11,7 +11,7 @@ export const Footer = () => {
               AfroEssence <span className="text-accent">BY K</span>
             </h3>
             <p className="text-muted-foreground">
-              Professional natural hair styling and locs services in York.
+              Professional hair braiding and beauty services in York.
             </p>
           </div>
 
@@ -27,6 +27,9 @@ export const Footer = () => {
               <Link to="/gallery" className="block text-muted-foreground hover:text-accent transition-colors">
                 Gallery
               </Link>
+              <Link to="/policies" className="block text-muted-foreground hover:text-accent transition-colors">
+                Policies
+              </Link>
               <Link to="/booking" className="block text-muted-foreground hover:text-accent transition-colors">
                 Book Now
               </Link>
@@ -40,7 +43,7 @@ export const Footer = () => {
                 <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
                 <div>
                   <p>Mon-Sat: 09:00 - 21:00</p>
-                  <p>Sunday: 14:00 - 20:00</p>
+                  <p>Sunday: 14:00 - 19:00</p>
                 </div>
               </div>
             </div>

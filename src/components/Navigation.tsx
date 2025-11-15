@@ -46,6 +46,7 @@ export const Navigation = () => {
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
     { to: "/gallery", label: "Gallery" },
+    { to: "/policies", label: "Policies" },
     { to: "/contact", label: "Contact" },
   ];
 
