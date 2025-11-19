@@ -6,6 +6,9 @@ import gallery3 from "@/assets/gallery3.jpg";
 import gallery4 from "@/assets/gallery4.jpg";
 import gallery5 from "@/assets/gallery5.jpg";
 import gallery6 from "@/assets/gallery6.jpg";
+import gallery7 from "@/assets/gallery7.jpg";
+import gallery8 from "@/assets/gallery8.jpg";
+import gallery9 from "@/assets/gallery9.jpg";
 import gallery11 from "@/assets/gallery11.jpg";
 import gallery12 from "@/assets/gallery12.jpg";
 import gallery13 from "@/assets/gallery13.jpg";
@@ -29,6 +32,9 @@ const Gallery = () => {
     { id: 10, url: gallery11, alt: "Stunning style" },
     { id: 11, url: gallery6, alt: "Beautiful locs" },
     { id: 12, url: gallery12, alt: "Expert styling" },
+    { id: 13, url: gallery7, alt: "Elegant braids" },
+    { id: 14, url: gallery8, alt: "Beautiful hairstyle" },
+    { id: 15, url: gallery9, alt: "Professional work" },
   ];
 
   return (
