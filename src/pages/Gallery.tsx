@@ -9,32 +9,30 @@ import gallery6 from "@/assets/gallery6.jpg";
 import gallery7 from "@/assets/gallery7.jpg";
 import gallery8 from "@/assets/gallery8.jpg";
 import gallery9 from "@/assets/gallery9.jpg";
+import gallery10 from "@/assets/gallery10.jpg";
 import gallery11 from "@/assets/gallery11.jpg";
 import gallery12 from "@/assets/gallery12.jpg";
 import gallery13 from "@/assets/gallery13.jpg";
 import gallery14 from "@/assets/gallery14.jpg";
-import gallery15 from "@/assets/gallery15.jpg";
-import gallery16 from "@/assets/gallery16.jpg";
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const galleryImages = [
     { id: 1, url: gallery1, alt: "Natural hair styling" },
-    { id: 2, url: gallery13, alt: "Creative styling" },
-    { id: 3, url: gallery2, alt: "Locs maintenance" },
-    { id: 4, url: gallery14, alt: "Hair artistry" },
-    { id: 5, url: gallery3, alt: "Creative hair design" },
-    { id: 6, url: gallery15, alt: "Professional work" },
-    { id: 7, url: gallery4, alt: "Professional styling" },
-    { id: 8, url: gallery16, alt: "Beautiful design" },
-    { id: 9, url: gallery5, alt: "Hair artistry" },
-    { id: 10, url: gallery11, alt: "Stunning style" },
-    { id: 11, url: gallery6, alt: "Beautiful locs" },
+    { id: 2, url: gallery2, alt: "Locs maintenance" },
+    { id: 3, url: gallery3, alt: "Creative hair design" },
+    { id: 4, url: gallery4, alt: "Professional styling" },
+    { id: 5, url: gallery5, alt: "Hair artistry" },
+    { id: 6, url: gallery6, alt: "Beautiful locs" },
+    { id: 7, url: gallery7, alt: "Elegant braids" },
+    { id: 8, url: gallery8, alt: "Beautiful hairstyle" },
+    { id: 9, url: gallery9, alt: "Professional work" },
+    { id: 10, url: gallery10, alt: "Stunning hairstyle" },
+    { id: 11, url: gallery11, alt: "Stunning style" },
     { id: 12, url: gallery12, alt: "Expert styling" },
-    { id: 13, url: gallery7, alt: "Elegant braids" },
-    { id: 14, url: gallery8, alt: "Beautiful hairstyle" },
-    { id: 15, url: gallery9, alt: "Professional work" },
+    { id: 13, url: gallery13, alt: "Creative styling" },
+    { id: 14, url: gallery14, alt: "Hair artistry" },
   ];
 
   return (
@@ -57,7 +55,7 @@ const Gallery = () => {
             {galleryImages.map((image, index) => (
               <div 
                 key={image.id}
-                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300 cursor-pointer transform hover:scale-105 border border-amber-500/20"
+                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300 cursor-pointer border border-amber-500/20"
                 onClick={() => setSelectedImage(image.url)}
                 style={{
                   animationDelay: `${index * 0.1}s`
@@ -67,7 +65,7 @@ const Gallery = () => {
                   <img 
                     src={image.url} 
                     alt={image.alt}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                   />
                 </div>
