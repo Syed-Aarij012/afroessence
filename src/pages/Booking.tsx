@@ -12,6 +12,7 @@ import { Card3D, InteractiveCard } from "@/components/3D/Card3D";
 import { AnimatedBackground } from "@/components/3D/AnimatedBackground";
 import { CheckCircle, Clock, User as UserIcon, Calendar as CalendarIcon } from "lucide-react";
 import { useWeeklySchedule } from "@/hooks/useWeeklySchedule";
+import HierarchicalServiceSelector from "@/components/HierarchicalServiceSelector";
 
 // Helper function to format date without timezone conversion
 const formatDateForDatabase = (date: Date): string => {
@@ -31,11 +32,23 @@ interface Service {
   parent_id?: string;
 }
 
-interface ServiceCategory {
+interface SubService {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  price: number;
+}
+
+interface PrimaryService {
+  id: string;
   name: string;
   description: string;
-  services: Service[];
-  subcategories?: ServiceCategory[];
+}
+
+interface ServiceCategory {
+  id: string;
+  name: string;
+  description: string;
 }
 
 interface Professional {
@@ -53,12 +66,14 @@ const Booking = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedSubService, setSelectedSubService] = useState<SubService | null>(null);
+  const [selectedPrimaryService, setSelectedPrimaryService] = useState<PrimaryService | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
   const [selectedProfessional, setSelectedProfessional] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -211,10 +226,12 @@ const Booking = () => {
 
       const { error } = await supabase.from("bookings").insert({
         user_id: user.id,
-        service_id: selectedService,
+        sub_service_id: selectedService,
         professional_id: selectedProfessional,
         booking_date: formattedDate,
         booking_time: selectedTime,
+        duration_minutes: selectedSubService?.duration_minutes,
+        total_price: selectedSubService?.price,
         status: "pending",
       });
 
@@ -301,158 +318,15 @@ const Booking = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid gap-4">
-                      {(() => {
-                        const toggleCategory = (categoryPath: string) => {
-                          const newExpanded = new Set(expandedCategories);
-                          if (newExpanded.has(categoryPath)) {
-                            newExpanded.delete(categoryPath);
-                          } else {
-                            newExpanded.add(categoryPath);
-                          }
-                          setExpandedCategories(newExpanded);
-                        };
-
-                        // Build hierarchical structure from flat services list
-                        const buildHierarchy = (parentCategory: string = "", level: number = 0): any[] => {
-                          const items: any[] = [];
-                          const categoryMap: { [key: string]: Service[] } = {};
-                          
-                          services.forEach(service => {
-                            if (!service.category) return;
-                            
-                            const parts = service.category.split(' > ');
-                            const currentLevel = parts.slice(0, level + 1).join(' > ');
-                            const parentLevel = parts.slice(0, level).join(' > ');
-                            
-                            if (parentLevel === parentCategory && parts.length > level) {
-                              const categoryName = parts[level];
-                              const fullPath = parts.slice(0, level + 1).join(' > ');
-                              
-                              if (!categoryMap[fullPath]) {
-                                categoryMap[fullPath] = [];
-                              }
-                              
-                              // Only add if this is the final level for this service
-                              if (parts.length === level + 1) {
-                                categoryMap[fullPath].push(service);
-                              }
-                            }
-                          });
-
-                          Object.entries(categoryMap).forEach(([fullPath, categoryServices]) => {
-                            const parts = fullPath.split(' > ');
-                            const categoryName = parts[parts.length - 1];
-                            const hasSubcategories = services.some(s => 
-                              s.category && s.category.startsWith(fullPath + ' > ')
-                            );
-
-                            items.push({
-                              name: categoryName,
-                              fullPath,
-                              services: categoryServices,
-                              hasSubcategories,
-                              level
-                            });
-                          });
-
-                          return items;
-                        };
-
-                        const renderCategory = (item: any, index: number) => {
-                          const isExpanded = expandedCategories.has(item.fullPath);
-                          const indent = item.level * 20;
-
-                          return (
-                            <div key={item.fullPath}>
-                              <InteractiveCard className="overflow-hidden">
-                                <CardContent className="p-0">
-                                  {/* Category Header */}
-                                  <div
-                                    className="p-4 cursor-pointer hover:bg-muted/50 transition-all duration-300"
-                                    style={{ paddingLeft: `${16 + indent}px` }}
-                                    onClick={() => toggleCategory(item.fullPath)}
-                                  >
-                                    <div className="flex justify-between items-center">
-                                      <div>
-                                        <h3 className={`font-semibold ${item.level === 0 ? 'text-lg' : 'text-base'} group-hover:text-accent transition-colors`}>
-                                          {item.name}
-                                        </h3>
-                                        {item.hasSubcategories && (
-                                          <p className="text-muted-foreground text-sm">
-                                            Click to view options
-                                          </p>
-                                        )}
-                                      </div>
-                                      {(item.hasSubcategories || item.services.length > 0) && (
-                                        <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                                          <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                          </svg>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* Expanded Content */}
-                                  {isExpanded && (
-                                    <div className="border-t border-border/50 bg-muted/10">
-                                      {/* Render subcategories */}
-                                      {item.hasSubcategories && (
-                                        <div className="space-y-2 p-2">
-                                          {buildHierarchy(item.fullPath, item.level + 1).map((subItem, subIndex) => 
-                                            renderCategory(subItem, subIndex)
-                                          )}
-                                        </div>
-                                      )}
-                                      
-                                      {/* Render services at this level */}
-                                      {item.services.length > 0 && (
-                                        <div>
-                                          {item.services.map((service: Service) => (
-                                            <div
-                                              key={service.id}
-                                              className={`p-4 border-b border-border/30 last:border-b-0 cursor-pointer hover:bg-accent/5 transition-all duration-300 ${
-                                                selectedService === service.id ? 'bg-accent/10 border-l-4 border-l-accent' : ''
-                                              }`}
-                                              style={{ paddingLeft: `${24 + indent}px` }}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedService(service.id);
-                                              }}
-                                            >
-                                              <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                  <h4 className="font-medium text-base">
-                                                    {service.name}
-                                                  </h4>
-                                                  {service.description && (
-                                                    <p className="text-muted-foreground text-sm mt-1">{service.description}</p>
-                                                  )}
-                                                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
-                                                    <Clock className="h-4 w-4 mr-1" />
-                                                    {service.duration_minutes} min
-                                                  </div>
-                                                </div>
-                                                <div className="text-accent font-bold text-lg ml-4">
-                                                  £{service.price.toFixed(2)}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </CardContent>
-                              </InteractiveCard>
-                            </div>
-                          );
-                        };
-
-                        return buildHierarchy().map((item, index) => renderCategory(item, index));
-                      })()}
-                    </div>
+                    <HierarchicalServiceSelector
+                      onServiceSelect={(subService, primaryService, category) => {
+                        setSelectedSubService(subService);
+                        setSelectedPrimaryService(primaryService);
+                        setSelectedCategory(category);
+                        setSelectedService(subService.id);
+                      }}
+                      selectedServiceId={selectedService}
+                    />
                     <Button
                       className="w-full mt-6 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 transform hover:scale-105 transition-all duration-300 shadow-lg"
                       onClick={() => setStep(2)}
@@ -617,8 +491,13 @@ const Booking = () => {
                     <div className="space-y-6">
                       {[
                         {
+                          label: "Category",
+                          value: selectedCategory?.name,
+                          icon: <UserIcon className="h-5 w-5" />
+                        },
+                        {
                           label: "Service",
-                          value: services.find(s => s.id === selectedService)?.name,
+                          value: selectedSubService?.name,
                           icon: <UserIcon className="h-5 w-5" />
                         },
                         {
@@ -630,6 +509,11 @@ const Booking = () => {
                           label: "Date & Time",
                           value: `${selectedDate?.toLocaleDateString()} at ${selectedTime?.substring(0, 5)}`,
                           icon: <CalendarIcon className="h-5 w-5" />
+                        },
+                        {
+                          label: "Duration",
+                          value: `${selectedSubService?.duration_minutes} minutes`,
+                          icon: <Clock className="h-5 w-5" />
                         }
                       ].map((item, index) => (
                         <FloatingElement key={item.label} delay={index * 0.1}>
@@ -645,12 +529,12 @@ const Booking = () => {
                         </FloatingElement>
                       ))}
                       
-                      <FloatingElement delay={0.4}>
+                      <FloatingElement delay={0.5}>
                         <div className="p-6 rounded-lg bg-gradient-to-br from-accent/10 to-primary/10 border border-accent/20">
                           <div className="flex items-center justify-between">
                             <h3 className="font-semibold text-lg">Total Price</h3>
                             <p className="text-3xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-                              £{services.find(s => s.id === selectedService)?.price.toFixed(2)}
+                              £{selectedSubService?.price.toFixed(2)}
                             </p>
                           </div>
                         </div>
