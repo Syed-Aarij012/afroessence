@@ -387,10 +387,10 @@ SELECT id, '1 hour', 60, 65.00, 2 FROM primary_services WHERE name = 'Back, Neck
 
 -- 20. Head Massage
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, '30 minutes', 30, 25.00, 1 FROM primary_services WHERE name = 'Head Massage';
+SELECT id, '20 minutes', 20, 25.00, 1 FROM primary_services WHERE name = 'Head Massage';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, '1 hour', 60, 45.00, 2 FROM primary_services WHERE name = 'Head Massage';
+SELECT id, '40 minutes', 40, 45.00, 2 FROM primary_services WHERE name = 'Head Massage';
 
 -- 21. Foot Massage
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
@@ -401,7 +401,10 @@ SELECT id, '30 minutes', 30, 35.00, 2 FROM primary_services WHERE name = 'Foot M
 
 -- 22. Hand Massage
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Hand Massage (15-30 mins)', 22, 20.00, 1 FROM primary_services WHERE name = 'Hand Massage';
+SELECT id, '15 minutes', 15, 20.00, 1 FROM primary_services WHERE name = 'Hand Massage';
+
+INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
+SELECT id, '30 minutes', 30, 35.00, 2 FROM primary_services WHERE name = 'Hand Massage';
 
 -- 23. Girls - Wash & Blow Dry
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)

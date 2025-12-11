@@ -56,7 +56,7 @@ const About = () => {
                   {
                     icon: <Award className="w-10 h-10" />,
                     title: "Expertise",
-                    description: "Our skilled stylists bring years of experience in natural hair care, locs maintenance, and creative styling techniques.",
+                    description: "Our skilled stylists bring years of experience in natural hair care and creative styling techniques.",
                     color: "from-amber-500 to-yellow-600"
                   },
                   {
