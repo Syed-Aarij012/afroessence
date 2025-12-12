@@ -227,73 +227,73 @@ INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, dis
 SELECT id, '10+ Cornrows (plain)', 120, 50.00, 2 FROM primary_services WHERE name = 'Ladies - Cornrows';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Corn Row + extension', 90, 55.00, 3 FROM primary_services WHERE name = 'Ladies - Cornrows';
+SELECT id, 'Corn Row + extension', 90, 80.00, 3 FROM primary_services WHERE name = 'Ladies - Cornrows';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'CornRow with Design + extensions', 120, 80.00, 4 FROM primary_services WHERE name = 'Ladies - Cornrows';
+SELECT id, 'CornRow with Design + extensions', 120, 105.00, 4 FROM primary_services WHERE name = 'Ladies - Cornrows';
 
 -- 8. Ladies - Box Braids
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Box Braids (B) + extensions', 360, 105.00, 1 FROM primary_services WHERE name = 'Ladies - Box Braids';
+SELECT id, 'Box Braids (B) + extensions', 360, 130.00, 1 FROM primary_services WHERE name = 'Ladies - Box Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Jumbo box Braids + extensions', 180, 105.00, 2 FROM primary_services WHERE name = 'Ladies - Box Braids';
+SELECT id, 'Jumbo box Braids + extensions', 180, 130.00, 2 FROM primary_services WHERE name = 'Ladies - Box Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Box Braid (S/M) + extensions', 600, 200.00, 3 FROM primary_services WHERE name = 'Ladies - Box Braids';
+SELECT id, 'Box Braid (S/M) + extensions', 600, 225.00, 3 FROM primary_services WHERE name = 'Ladies - Box Braids';
 
 -- 9. Ladies - Twists
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
 SELECT id, 'Natural hair Twist', 240, 100.00, 1 FROM primary_services WHERE name = 'Ladies - Twists';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Twist + extension', 360, 145.00, 2 FROM primary_services WHERE name = 'Ladies - Twists';
+SELECT id, 'Twist + extension', 360, 170.00, 2 FROM primary_services WHERE name = 'Ladies - Twists';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Afro/Marley Twist + extension', 360, 155.00, 3 FROM primary_services WHERE name = 'Ladies - Twists';
+SELECT id, 'Afro/Marley Twist + extension', 360, 180.00, 3 FROM primary_services WHERE name = 'Ladies - Twists';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Mini twist with extension', 480, 170.00, 4 FROM primary_services WHERE name = 'Ladies - Twists';
+SELECT id, 'Mini twist with extension', 480, 195.00, 4 FROM primary_services WHERE name = 'Ladies - Twists';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Micro Twist + extension', 600, 300.00, 5 FROM primary_services WHERE name = 'Ladies - Twists';
+SELECT id, 'Micro Twist + extension', 600, 325.00, 5 FROM primary_services WHERE name = 'Ladies - Twists';
 
 -- 10. Ladies - Afro Braids
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Ghana weave Allback (B)', 240, 85.00, 1 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Ghana weave Allback (B)', 240, 110.00, 1 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Ghana weave Shuku (B)', 240, 85.00, 2 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Ghana weave Shuku (B)', 240, 110.00, 2 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Crochet Braids', 180, 100.00, 3 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Crochet Braids', 180, 125.00, 3 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Single plait', 240, 100.00, 4 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Single plait', 240, 125.00, 4 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Half cornrow/Braids + extension', 420, 130.00, 5 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Half cornrow/Braids + extension', 420, 155.00, 5 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Ghana weave Allback (S/M) + extension', 360, 140.00, 6 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Ghana weave Allback (S/M) + extension', 360, 165.00, 6 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Ghana weave shuku (S/M) + extension', 360, 140.00, 7 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Ghana weave shuku (S/M) + extension', 360, 165.00, 7 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Knotless Braids (B) + extension', 360, 140.00, 8 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Knotless Braids (B) + extension', 360, 165.00, 8 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Styled Cornrow/Braids + extension', 420, 140.00, 9 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Styled Cornrow/Braids + extension', 420, 165.00, 9 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Knotless with curls + extensions', 480, 190.00, 10 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Knotless with curls + extensions', 480, 215.00, 10 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'French curls + extensions', 600, 200.00, 11 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'French curls + extensions', 600, 225.00, 11 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Knotless Braids (S/M) + extensions', 600, 200.00, 12 FROM primary_services WHERE name = 'Ladies - Afro Braids';
+SELECT id, 'Knotless Braids (S/M) + extensions', 600, 225.00, 12 FROM primary_services WHERE name = 'Ladies - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
 SELECT id, 'Loose Box/knotless braids (B)', 600, 220.00, 13 FROM primary_services WHERE name = 'Ladies - Afro Braids';
@@ -412,10 +412,10 @@ SELECT id, 'Girls - Wash & Blow Dry', 30, 35.00, 1 FROM primary_services WHERE n
 
 -- 24. Children - Afro Braids
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Single/braids (no extensions)', 360, 75.00, 1 FROM primary_services WHERE name = 'Children - Afro Braids';
+SELECT id, 'Single/braids (no extensions)', 360, 100.00, 1 FROM primary_services WHERE name = 'Children - Afro Braids';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Single/braids (extensions)', 360, 85.00, 2 FROM primary_services WHERE name = 'Children - Afro Braids';
+SELECT id, 'Single/braids (extensions)', 360, 110.00, 2 FROM primary_services WHERE name = 'Children - Afro Braids';
 
 -- 25. Children - Cornrows
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
@@ -435,10 +435,10 @@ SELECT id, 'Design cornrows with extensions (extension not included)', 90, 75.00
 
 -- 26. Children - Twists
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Twist (no extensions)', 360, 70.00, 1 FROM primary_services WHERE name = 'Children - Twists';
+SELECT id, 'Twist (no extensions)', 360, 95.00, 1 FROM primary_services WHERE name = 'Children - Twists';
 
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)
-SELECT id, 'Twist (extension)', 360, 90.00, 2 FROM primary_services WHERE name = 'Children - Twists';
+SELECT id, 'Twist (extension)', 360, 115.00, 2 FROM primary_services WHERE name = 'Children - Twists';
 
 -- 27. Ladies - Full Head Weave
 INSERT INTO sub_services (primary_service_id, name, duration_minutes, price, display_order)

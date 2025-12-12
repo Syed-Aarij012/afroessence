@@ -102,26 +102,57 @@ const MyBookings = () => {
 
       console.log("Raw bookings data:", bookingsData);
 
-      // Then get services and professionals separately
-      const { data: servicesData } = await db
-        .from("services")
+      // Then get sub-services, primary services, categories and professionals separately
+      const { data: subServicesData } = await db
+        .from("sub_services")
+        .select("id, name, price, primary_service_id");
+
+      const { data: primaryServicesData } = await db
+        .from("primary_services")
+        .select("id, name, category_id");
+
+      const { data: categoriesData } = await db
+        .from("service_categories")
         .select("id, name");
 
       const { data: professionalsData } = await db
         .from("professionals")
         .select("id, name");
 
-      console.log("Services data:", servicesData);
-      console.log("Professionals data:", professionalsData);
+      console.log("MyBookings - Loaded data:", {
+        subServices: subServicesData?.length,
+        primaryServices: primaryServicesData?.length,
+        categories: categoriesData?.length,
+        professionals: professionalsData?.length
+      });
 
       // Combine the data manually
       const enrichedBookings = (bookingsData || []).map((booking: any) => {
-        const service = servicesData?.find((s: any) => s.id === booking.service_id);
+        // Look for sub_service_id first (new system), then fall back to service_id (old system)
+        const serviceId = booking.sub_service_id || booking.service_id;
+        const subService = subServicesData?.find((s: any) => s.id === serviceId);
+        
+        let serviceName = "Unknown Service";
+        
+        if (subService) {
+          // Get primary service and category for full name
+          const primaryService = primaryServicesData?.find((p: any) => p.id === subService.primary_service_id);
+          const category = categoriesData?.find((c: any) => c.id === primaryService?.category_id);
+          
+          serviceName = `${subService.name}`;
+          if (primaryService) {
+            serviceName = `${primaryService.name} - ${subService.name}`;
+          }
+          if (category) {
+            serviceName = `${category.name}: ${primaryService?.name || ''} - ${subService.name}`;
+          }
+        }
+        
         const professional = professionalsData?.find((p: any) => p.id === booking.professional_id);
         
         return {
           ...booking,
-          services: { name: service?.name || "Unknown Service" },
+          services: { name: serviceName },
           professionals: { name: professional?.name || "Unknown Professional" }
         };
       });

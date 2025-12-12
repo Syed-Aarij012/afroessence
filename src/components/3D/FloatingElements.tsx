@@ -13,36 +13,8 @@ export const FloatingElement = ({
   duration = 3, 
   amplitude = 10 
 }: FloatingElementProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  return (
-    <div
-      className={`transform transition-all duration-1000 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-      }`}
-      style={{
-        animation: `float ${duration}s ease-in-out infinite`,
-        animationDelay: `${delay}s`,
-        '--amplitude': `${amplitude}px`,
-      } as React.CSSProperties}
-    >
-      {children}
-      <style>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(var(--amplitude));
-          }
-        }
-      `}</style>
-    </div>
-  );
+  // Disabled animations - just render children without floating effect
+  return <div>{children}</div>;
 };
 
 export const ParticleBackground = () => {

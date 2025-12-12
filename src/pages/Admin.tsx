@@ -42,9 +42,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FloatingElement, ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
+import { ParticleBackground, GradientOrb } from "@/components/3D/FloatingElements";
 import { AnimatedBackground, ParallaxSection } from "@/components/3D/AnimatedBackground";
 import { AdminCalendar } from "@/components/AdminCalendar";
+
+// Removed FloatingElement animations - using regular divs instead
 
 interface Booking {
   id: string;
@@ -215,46 +217,120 @@ const ModernAdmin = () => {
         .select("*", { count: "exact", head: true })
         .eq("status", "pending");
 
-      // Get today's bookings
-      const today = new Date().toISOString().split('T')[0];
-      const { count: todayCount } = await db
+      // Get today's bookings - fix timezone issue
+      const now = new Date();
+      const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+      console.log("Today's date for filtering:", today);
+      console.log("Current date/time:", new Date().toString());
+      console.log("Timezone offset:", new Date().getTimezoneOffset());
+      
+      const { count: todayCount, error: todayError } = await db
         .from("bookings")
         .select("*", { count: "exact", head: true })
         .eq("booking_date", today);
+        
+      console.log("Today's bookings count:", todayCount, "Error:", todayError);
+      
+      // Get all booking dates to see what format they're in and check for today's date
+      const { data: allBookingDates } = await db
+        .from("bookings")
+        .select("booking_date")
+        .limit(10);
+      console.log("Sample booking dates:", allBookingDates);
+      console.log("Looking for today's date:", today);
+      
+      // Check if any booking dates match today
+      const todayBookings = allBookingDates?.filter(b => b.booking_date === today) || [];
+      console.log("Manual today's bookings found:", todayBookings.length);
+      
+      // Get all bookings for today manually to debug
+      const { data: todayBookingsData, error: todayBookingsError } = await db
+        .from("bookings")
+        .select("id, booking_date, status")
+        .eq("booking_date", today);
+        
+      console.log("Today's bookings data:", todayBookingsData, "Error:", todayBookingsError);
 
       // Get revenue data - ONLY from completed bookings
-      const { data: completedBookings } = await db
+      const { data: completedBookings, error: completedError } = await db
         .from("bookings")
-        .select("service_id, created_at")
+        .select("*")
         .eq("status", "completed");
+        
+      console.log("Completed bookings query result:", completedBookings, "Error:", completedError);
+      
+      if (completedError) {
+        console.error("Completed bookings error details:", completedError);
+      }
 
-      // Get all services to calculate prices
-      const { data: servicesData } = await db
+      // Get all sub-services to calculate prices (new system)
+      const { data: subServicesData } = await db
+        .from("sub_services")
+        .select("id, price");
+
+      // Get old services for backward compatibility
+      const { data: oldServicesData } = await db
         .from("services")
         .select("id, price");
 
       console.log("Completed bookings for revenue:", completedBookings?.length);
-      console.log("Services data:", servicesData?.length);
+      console.log("Sub-services data:", subServicesData?.length);
+      console.log("Old services data:", oldServicesData?.length);
+      console.log("Sample completed booking:", completedBookings?.[0]);
 
       // Calculate total revenue
-      const totalRevenue = completedBookings?.reduce((sum, booking) => {
-        const service = servicesData?.find((s: any) => s.id === booking.service_id);
-        const price = service?.price || 0;
-        console.log(`Adding ${price} to revenue for booking ${booking.service_id}`);
-        return sum + price;
-      }, 0) || 0;
+      const totalRevenue = (completedBookings || []).reduce((sum, booking) => {
+        // First try to use total_price if available
+        if (booking.total_price && booking.total_price > 0) {
+          console.log(`Using total_price ${booking.total_price} for booking`);
+          return sum + booking.total_price;
+        }
+        
+        // Then try sub_service_id (new system)
+        if (booking.sub_service_id) {
+          const subService = subServicesData?.find((s: any) => s.id === booking.sub_service_id);
+          const price = subService?.price || 0;
+          console.log(`Adding ${price} to revenue for sub_service ${booking.sub_service_id}`);
+          return sum + price;
+        }
+        
+        // Fall back to service_id (old system)
+        if (booking.service_id) {
+          const service = oldServicesData?.find((s: any) => s.id === booking.service_id);
+          const price = service?.price || 0;
+          console.log(`Adding ${price} to revenue for old service ${booking.service_id}`);
+          return sum + price;
+        }
+        
+        console.log('No price found for booking:', booking);
+        return sum;
+      }, 0);
 
       // Calculate monthly revenue (current month) - ONLY from completed bookings
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
-      const monthlyRevenue = completedBookings?.reduce((sum, booking) => {
+      const monthlyRevenue = (completedBookings || []).reduce((sum, booking) => {
         const bookingDate = new Date(booking.created_at);
         if (bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear) {
-          const service = servicesData?.find((s: any) => s.id === booking.service_id);
-          return sum + (service?.price || 0);
+          // First try to use total_price if available
+          if (booking.total_price && booking.total_price > 0) {
+            return sum + booking.total_price;
+          }
+          
+          // Then try sub_service_id (new system)
+          if (booking.sub_service_id) {
+            const subService = subServicesData?.find((s: any) => s.id === booking.sub_service_id);
+            return sum + (subService?.price || 0);
+          }
+          
+          // Fall back to service_id (old system)
+          if (booking.service_id) {
+            const service = oldServicesData?.find((s: any) => s.id === booking.service_id);
+            return sum + (service?.price || 0);
+          }
         }
         return sum;
-      }, 0) || 0;
+      }, 0);
 
       console.log("Total revenue calculated:", totalRevenue);
       console.log("Monthly revenue calculated:", monthlyRevenue);
@@ -264,7 +340,7 @@ const ModernAdmin = () => {
         totalBookings: bookingCount || 0,
         totalRevenue,
         pendingBookings: pendingCount || 0,
-        todayBookings: todayCount || 0,
+        todayBookings: todayCount || todayBookingsData?.length || 0,
         monthlyRevenue,
       });
     } catch (error) {
@@ -286,10 +362,18 @@ const ModernAdmin = () => {
         return;
       }
 
-      // Load services and professionals separately
-      const { data: servicesData } = await db
-        .from("services")
-        .select("id, name, price");
+      // Load sub-services, primary services, categories and professionals separately
+      const { data: subServicesData } = await db
+        .from("sub_services")
+        .select("id, name, price, primary_service_id");
+
+      const { data: primaryServicesData } = await db
+        .from("primary_services")
+        .select("id, name, category_id");
+
+      const { data: categoriesData } = await db
+        .from("service_categories")
+        .select("id, name");
 
       const { data: professionalsData } = await db
         .from("professionals")
@@ -301,23 +385,51 @@ const ModernAdmin = () => {
 
       console.log("Admin - Loaded data:", {
         bookings: bookingsData?.length,
-        services: servicesData?.length,
+        subServices: subServicesData?.length,
+        primaryServices: primaryServicesData?.length,
+        categories: categoriesData?.length,
         professionals: professionalsData?.length,
         profiles: profilesData?.length
       });
 
+      console.log("Sample booking:", bookingsData?.[0]);
+      console.log("Sample profile:", profilesData?.[0]);
+
       // Combine data manually
       const enrichedBookings = (bookingsData || []).map((booking: any) => {
-        const service = servicesData?.find((s: any) => s.id === booking.service_id);
+        // Look for sub_service_id first (new system), then fall back to service_id (old system)
+        const serviceId = booking.sub_service_id || booking.service_id;
+        const subService = subServicesData?.find((s: any) => s.id === serviceId);
+        
+        let serviceName = "Unknown Service";
+        let servicePrice = 0;
+        
+        if (subService) {
+          // Get primary service and category for full name
+          const primaryService = primaryServicesData?.find((p: any) => p.id === subService.primary_service_id);
+          const category = categoriesData?.find((c: any) => c.id === primaryService?.category_id);
+          
+          serviceName = `${subService.name}`;
+          if (primaryService) {
+            serviceName = `${primaryService.name} - ${subService.name}`;
+          }
+          if (category) {
+            serviceName = `${category.name}: ${primaryService?.name || ''} - ${subService.name}`;
+          }
+          servicePrice = subService.price;
+        }
+        
         const professional = professionalsData?.find((p: any) => p.id === booking.professional_id);
         const profile = profilesData?.find((pr: any) => pr.id === booking.user_id);
+        
+        console.log(`Booking ${booking.id}: user_id=${booking.user_id}, found profile:`, profile);
         
         return {
           ...booking,
           services: { 
-            id: service?.id,
-            name: service?.name || "Unknown Service",
-            price: service?.price || 0
+            id: serviceId,
+            name: serviceName,
+            price: servicePrice
           },
           professionals: { 
             id: professional?.id,
@@ -351,16 +463,21 @@ const ModernAdmin = () => {
       // Load all bookings and services separately
       const { data: allBookings } = await db
         .from("bookings")
-        .select("id, user_id, booking_date, service_id, status");
+        .select("id, user_id, booking_date, service_id, sub_service_id, total_price, status");
 
-      const { data: servicesData } = await db
+      const { data: subServicesData } = await db
+        .from("sub_services")
+        .select("id, price");
+
+      const { data: oldServicesData } = await db
         .from("services")
         .select("id, price");
 
       console.log("Admin - User stats data:", {
         profiles: profiles?.length,
         bookings: allBookings?.length,
-        services: servicesData?.length
+        subServices: subServicesData?.length,
+        oldServices: oldServicesData?.length
       });
 
       const usersWithStats = (profiles || []).map((profile: any) => {
@@ -373,8 +490,24 @@ const ModernAdmin = () => {
         
         // Calculate total spent
         const totalSpent = userBookings.reduce((sum: number, booking: any) => {
-          const service = servicesData?.find((s: any) => s.id === booking.service_id);
-          return sum + (service?.price || 0);
+          // First try to use total_price if available
+          if (booking.total_price && booking.total_price > 0) {
+            return sum + booking.total_price;
+          }
+          
+          // Then try sub_service_id (new system)
+          if (booking.sub_service_id) {
+            const subService = subServicesData?.find((s: any) => s.id === booking.sub_service_id);
+            return sum + (subService?.price || 0);
+          }
+          
+          // Fall back to service_id (old system)
+          if (booking.service_id) {
+            const service = oldServicesData?.find((s: any) => s.id === booking.service_id);
+            return sum + (service?.price || 0);
+          }
+          
+          return sum;
         }, 0);
 
         // Find last booking date
@@ -767,14 +900,14 @@ const ModernAdmin = () => {
       <AnimatedBackground>
         <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
           <ParticleBackground />
-          <FloatingElement>
+          <div>
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full flex items-center justify-center animate-pulse">
                 <div className="w-8 h-8 bg-accent rounded-full"></div>
               </div>
               <p className="text-muted-foreground text-lg">Loading admin panel...</p>
             </div>
-          </FloatingElement>
+          </div>
         </div>
       </AnimatedBackground>
     );
@@ -1178,7 +1311,7 @@ const ModernAdmin = () => {
                 <TabsContent value="customers" className="w-full">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
                     {filteredUsers.map((userProfile, index) => (
-                      <FloatingElement key={userProfile.id} delay={index * 0.1}>
+                      <div>
                         <Card className="backdrop-blur-sm bg-card/90 border-border/50">
                           <CardContent className="p-6">
                             <div className="flex items-start justify-between mb-4">
@@ -1244,12 +1377,12 @@ const ModernAdmin = () => {
                             </div>
                           </CardContent>
                         </Card>
-                      </FloatingElement>
+                      </div>
                     ))}
 
                     {filteredUsers.length === 0 && (
                       <div className="col-span-2">
-                        <FloatingElement delay={0.5}>
+                        <div>
                           <Card className="backdrop-blur-sm bg-card/90">
                             <CardContent className="pt-6 text-center py-12">
                               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-muted/50 to-background/50 flex items-center justify-center">
@@ -1259,7 +1392,7 @@ const ModernAdmin = () => {
                               <p className="text-muted-foreground">Try adjusting your search</p>
                             </CardContent>
                           </Card>
-                        </FloatingElement>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1274,7 +1407,7 @@ const ModernAdmin = () => {
                         String(s.price).includes(searchTerm)
                       )
                       .map((service, index) => (
-                      <FloatingElement key={service.id} delay={index * 0.1}>
+                      <div>
                         <Card className="backdrop-blur-sm bg-card/90 border-border/50">
                           <CardContent className="p-6">
                       {editingServiceId === service.id ? (
@@ -1382,12 +1515,12 @@ const ModernAdmin = () => {
                       )}
                           </CardContent>
                         </Card>
-                      </FloatingElement>
+                      </div>
                     ))}
 
                     {services.length === 0 && (
                       <div className="col-span-3">
-                        <FloatingElement delay={0.5}>
+                        <div>
                           <Card className="backdrop-blur-sm bg-card/90">
                             <CardContent className="pt-6 text-center py-12">
                               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-muted/50 to-background/50 flex items-center justify-center">
@@ -1397,7 +1530,7 @@ const ModernAdmin = () => {
                               <p className="text-muted-foreground">Add services to get started</p>
                             </CardContent>
                           </Card>
-                        </FloatingElement>
+                        </div>
                       </div>
                     )}
                   </div>
