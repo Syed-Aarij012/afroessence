@@ -320,19 +320,29 @@ const Booking = () => {
                   <CardContent>
                     <HierarchicalServiceSelector
                       onServiceSelect={(subService, primaryService, category) => {
+                        console.log('Booking page - Service selected:', {
+                          subService,
+                          primaryService,
+                          category,
+                          subServiceId: subService.id
+                        });
                         setSelectedSubService(subService);
                         setSelectedPrimaryService(primaryService);
                         setSelectedCategory(category);
                         setSelectedService(subService.id);
+                        console.log('Booking page - State updated, selectedService:', subService.id);
                       }}
                       selectedServiceId={selectedService}
                     />
                     <Button
                       className="w-full mt-6 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 transform hover:scale-105 transition-all duration-300 shadow-lg"
-                      onClick={() => setStep(2)}
+                      onClick={() => {
+                        console.log('Continue button clicked, selectedService:', selectedService);
+                        setStep(2);
+                      }}
                       disabled={!selectedService}
                     >
-                      Continue
+                      Continue {selectedService ? '✓' : '(Select a service)'}
                     </Button>
                   </CardContent>
                 </Card3D>

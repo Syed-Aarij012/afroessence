@@ -63,6 +63,24 @@ const Policies = () => {
                     <span>Kindly use minimal oil/products where necessary</span>
                   </li>
                 </ul>
+                
+                <div className="mt-6 p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                  <p className="font-semibold text-foreground mb-2">For Braiding Appointments:</p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-1">•</span>
+                      <span>Clients may come with their hair already washed and blow-dried only if they prefer to do this themselves</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-1">•</span>
+                      <span>Otherwise, wash and blow-dry services are included with all braiding appointments, so arriving with unwashed or non-blow-dried hair is perfectly fine</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-1">•</span>
+                      <span>Please keep hair free of excessive oils or heavy products before your appointment</span>
+                    </li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
 

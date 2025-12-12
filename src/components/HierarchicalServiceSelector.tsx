@@ -50,6 +50,8 @@ export default function HierarchicalServiceSelector({ onServiceSelect, selectedS
         .eq('is_active', true)
         .order('display_order');
 
+      console.log('Categories data:', categoriesData, 'Error:', catError);
+
       if (catError) throw catError;
 
       const { data: primaryData, error: primError } = await supabase
@@ -58,6 +60,8 @@ export default function HierarchicalServiceSelector({ onServiceSelect, selectedS
         .eq('is_active', true)
         .order('display_order');
 
+      console.log('Primary services data:', primaryData, 'Error:', primError);
+
       if (primError) throw primError;
 
       const { data: subData, error: subError } = await supabase
@@ -65,6 +69,8 @@ export default function HierarchicalServiceSelector({ onServiceSelect, selectedS
         .select('*')
         .eq('is_active', true)
         .order('display_order');
+
+      console.log('Sub services data:', subData, 'Error:', subError);
 
       if (subError) throw subError;
 
@@ -79,6 +85,7 @@ export default function HierarchicalServiceSelector({ onServiceSelect, selectedS
           }))
       }));
 
+      console.log('Structured services:', structured);
       setCategories(structured);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -117,6 +124,10 @@ export default function HierarchicalServiceSelector({ onServiceSelect, selectedS
 
   if (loading) {
     return <div className="text-center py-8">Loading services...</div>;
+  }
+
+  if (categories.length === 0) {
+    return <div className="text-center py-8 text-red-500">No services found. Please check your database setup.</div>;
   }
 
   return (
@@ -170,9 +181,13 @@ export default function HierarchicalServiceSelector({ onServiceSelect, selectedS
                       {primaryService.sub_services.map((subService) => (
                         <button
                           key={subService.id}
-                          onClick={() => onServiceSelect(subService, primaryService, category)}
+                          onClick={() => {
+                            console.log('Service clicked:', subService, primaryService, category);
+                            console.log('Current selectedServiceId:', selectedServiceId);
+                            onServiceSelect(subService, primaryService, category);
+                          }}
                           className={`w-full px-10 py-3 hover:bg-amber-500/10 transition-colors flex items-center justify-between border-t border-amber-500/5 ${
-                            selectedServiceId === subService.id ? 'bg-amber-500/20' : ''
+                            selectedServiceId === subService.id ? 'bg-amber-500/20 border-amber-500/30' : ''
                           }`}
                         >
                           <div className="flex flex-col items-start gap-1">
@@ -188,8 +203,12 @@ export default function HierarchicalServiceSelector({ onServiceSelect, selectedS
                               </span>
                             </div>
                           </div>
-                          <div className="text-amber-500 font-semibold">
-                            Select
+                          <div className={`font-semibold ${
+                            selectedServiceId === subService.id 
+                              ? 'text-green-500' 
+                              : 'text-amber-500'
+                          }`}>
+                            {selectedServiceId === subService.id ? '✓ Selected' : 'Select'}
                           </div>
                         </button>
                       ))}
